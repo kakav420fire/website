@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glacier - We do what you need</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000 url('https://cdn.discordapp.com/attachments/1411267411201490957/1421485989896917182/2251490.png?ex=68d9357d&is=68d7e3fd&hm=fcaaf25736a2d67f89d95f51b1993cb348eb89b820c22ee6535e9be596596144&') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Dark overlay to make text readable */
+        .dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Page System */
+        .page {
+            display: none;
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .title {
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.02em;
+        }
+        
+        .subtitle {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            color: #e0e0e0;
+            font-weight: 400;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            line-height: 1.5;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        /* ACTUAL GLOSSY BUTTONS */
+        .glossy-button {
+            position: relative;
+            padding: 16px 32px;
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.7) 50%,
+                rgba(255, 255, 255, 0.5) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.9),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* TOP GLOSSY REFLECTION */
+        .glossy-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.5) 0%,
+                rgba(255, 255, 255, 0.2) 30%,
+                rgba(255, 255, 255, 0.1) 60%,
+                transparent 100%);
+            pointer-events: none;
+            border-radius: 10px 10px 50% 50%;
+        }
+        
+        /* MOVING SHINE EFFECT */
+        .glossy-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.6),
+                rgba(255, 255, 255, 0.8),
+                rgba(255, 255, 255, 0.6),
+                transparent);
+            transform: skewX(-25deg);
+            transition: left 0.8s ease;
+            pointer-events: none;
+        }
+        
+        .glossy-button:hover::after {
+            left: 100%;
+        }
+        
+        .glossy-button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.8) 50%,
+                rgba(255, 255, 255, 0.6) 100%);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.25),
+                0 10px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 1px rgba(255, 255, 255, 1),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glossy-button:active {
+            transform: translateY(0px);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0.6) 50%,
+                rgba(255, 255, 255, 0.4) 100%);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 1px rgba(255, 255, 255, 0.8),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+        }
+        
+        .secondary {
+            background: linear-gradient(145deg, 
+                rgba(74, 144, 226, 0.9) 0%,
+                rgba(74, 144, 226, 0.7) 50%,
+                rgba(74, 144, 226, 0.5) 100%);
+            color: white;
+            border-color: rgba(74, 144, 226, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .secondary:hover {
+            background: linear-gradient(145deg, 
+                rgba(74, 144, 226, 0.95) 0%,
+                rgba(74, 144, 226, 0.8) 50%,
+                rgba(74, 144, 226, 0.6) 100%);
+        }
+        
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 1000;
+            padding: 12px 20px;
+            font-size: 1rem;
+        }
+        
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        .particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-delay: -2s; }
+        .particle:nth-child(3) { width: 3px; height: 3px; left: 30%; animation-delay: -1s; }
+        .particle:nth-child(4) { width: 5px; height: 5px; left: 40%; animation-delay: -3s; }
+        .particle:nth-child(5) { width: 4px; height: 4px; left: 50%; animation-delay: -1.5s; }
+        .particle:nth-child(6) { width: 7px; height: 7px; left: 60%; animation-delay: -2.5s; }
+        .particle:nth-child(7) { width: 3px; height: 3px; left: 70%; animation-delay: -0.5s; }
+        .particle:nth-child(8) { width: 5px; height: 5px; left: 80%; animation-delay: -4s; }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            50% { 
+                transform: translateY(-20px) translateX(20px) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
+        
+        /* Features section - remove black tint completely */
+        .features {
+            background: transparent;
+            padding: 4rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(255, 255, 255, 0.15) 100%);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-description {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        
+        /* Download Page Styles */
+        .download-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .download-hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .download-title {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+       .tilt-image {
+    width: 500px;   /* bigger */
+    height: 300px;  /* bigger */
+    background: 
+        linear-gradient(145deg, 
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.1) 100%),
+        url("https://media.discordapp.net/attachments/1411267411201490957/1421307857760030740/Screenshot_2025-09-26_200609.png?ex=68d88f97&is=68d73e17&hm=6878384f0301358ead999864cda0106b71e16c48472c0b89bc71ca669b856dd9&=&format=webp&quality=lossless");
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #ffffff;
+    margin: 2rem auto; /* centers horizontally */
+    position: relative;
+    overflow: hidden;
+}
+
+
+        
+        .tilt-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .tilt-image:hover {
+            transform: rotateY(10deg) rotateX(5deg) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .changelog-section {
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .changelog-title {
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .changelog-item {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .changelog-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .changelog-version {
+            color: #4A90E2;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .changelog-content {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        
+        /* Notification - matching feature cards */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            color: #ffffff;
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            animation: slideIn 0.5s ease 2s forwards, slideOut 0.5s ease 6s forwards;
+            z-index: 1000;
+            max-width: 300px;
+            overflow: hidden;
+        }
+        
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+        
+        .notification-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            color: #cccccc;
+        }
+        
+        /* Admin Panel Styles */
+        .admin-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .admin-login {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            width: 350px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .admin-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .admin-login h3 {
+            color: #ffffff;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .admin-input {
+            width: 100%;
+            padding: 12px;
+            margin: 1rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            backdrop-filter: blur(5px);
+            outline: none;
+            font-size: 1rem;
+        }
+        
+        .admin-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .admin-input:focus {
+            border-color: rgba(74, 144, 226, 0.5);
+            box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+        }
+        
+        .admin-button {
+            background: linear-gradient(145deg, 
+                rgba(74, 144, 226, 0.9) 0%,
+                rgba(74, 144, 226, 0.7) 50%,
+                rgba(74, 144, 226, 0.5) 100%);
+            color: white;
+            border: 1px solid rgba(74, 144, 226, 0.5);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .admin-button:hover {
+            background: linear-gradient(145deg, 
+                rgba(74, 144, 226, 0.95) 0%,
+                rgba(74, 144, 226, 0.8) 50%,
+                rgba(74, 144, 226, 0.6) 100%);
+            transform: translateY(-1px);
+        }
+        
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            width: 80%;
+            max-width: 800px;
+            height: 80%;
+            overflow-y: auto;
+            text-align: left;
+            position: relative;
+            z-index: 10001;
+        }
+        
+        .admin-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .admin-panel h2 {
+            color: #ffffff;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .admin-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-section h3 {
+            color: #4A90E2;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .admin-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .error-message.show {
+            opacity: 1;
+        }
+        
+        .admin-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            backdrop-filter: blur(5px);
+            outline: none;
+            resize: vertical;
+        }
+        
+        .changelog-admin-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(145deg, 
+                rgba(255, 99, 99, 0.9) 0%,
+                rgba(255, 99, 99, 0.7) 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background: linear-gradient(145deg, 
+                rgba(255, 99, 99, 0.95) 0%,
+                rgba(255, 99, 99, 0.8) 100%);
+            transform: translateY(-1px);
+        }
+        
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes slideOut {
+            to { transform: translateX(400px); }
+        }
+        
+        @media (max-width: 768px) {
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .glossy-button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .notification {
+                left: 1rem;
+                right: 1rem;
+                max-width: none;
+            }
+            
+            .download-container {
+                padding: 1rem;
+            }
+            
+            .tilt-image {
+                width: 250px;
+                height: 150px;
+            }
+            
+            .admin-panel {
+                width: 95%;
+                height: 85%;
+                padding: 1rem;
+            }
+        }
+        
+        /* Loading screen */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeOut 1s ease 1.5s forwards;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4A90E2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <div class="dark-overlay"></div>
+    
+    <!-- Admin Panel Overlay -->
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-login" id="adminLogin">
+            <h3>🔐 Admin Access</h3>
+            <input type="password" class="admin-input" id="adminPassword" placeholder="Enter access code" maxlength="20">
+            <div class="error-message" id="errorMessage">Invalid access code</div>
+            <button class="admin-button" onclick="adminAuth()">Access</button>
+            <button class="admin-button" onclick="closeAdmin()" style="background: rgba(255,255,255,0.1);">Cancel</button>
+        </div>
+        
+        <div class="admin-panel" id="adminPanel">
+            <button class="admin-close" onclick="closeAdmin()">×</button>
+            <h2>🏔️ Glacier Admin Panel</h2>
+            
+            <div class="admin-section">
+                <h3>📥 Download Link Management</h3>
+                <label style="color: #ffffff; display: block; margin-bottom: 0.5rem;">Current Download URL:</label>
+                <input type="url" class="admin-input" id="downloadUrlInput" placeholder="https://example.com/download">
+                <button class="admin-button" onclick="updateDownloadUrl()">Update Download Link</button>
+            </div>
+            
+            <div class="admin-section">
+                <h3>📝 Changelog Management</h3>
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: #ffffff; display: block; margin-bottom: 0.5rem;">Version:</label>
+                    <input type="text" class="admin-input" id="changelogVersion" placeholder="v1.2.0">
+                    <label style="color: #ffffff; display: block; margin-bottom: 0.5rem;">Content:</label>
+                    <textarea class="admin-textarea" id="changelogContent" placeholder="• Added new features&#10;• Fixed bugs&#10;• Improved performance"></textarea>
+                    <button class="admin-button" onclick="addChangelog()">Add Changelog</button>
+                </div>
+                
+                <div id="changelogList">
+                    <!-- Existing changelogs will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <!-- Home Page -->
+    <div class="page active" id="homePage">
+        <div class="container">
+            <h1 class="title">Glacier</h1>
+            <p class="subtitle">We do what you need and want, quickly and simply.</p>
+            
+            <div class="button-container">
+                <a href="#" class="glossy-button" onclick="showPage('downloadPage')">Download</a>
+                <a href="https://discord.gg/your-invite" class="glossy-button secondary" target="_blank">Discord</a>
+            </div>
+        </div>
+        
+        <section class="features" id="features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">❄️</div>
+                    <h3 class="feature-title">Crystal Clear</h3>
+                    <p class="feature-description">Experience unparalleled clarity in every interaction. Our glacier-inspired interface cuts through complexity to deliver exactly what you need.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Lightning Fast</h3>
+                    <p class="feature-description">Speed that matches the pace of your ambitions. Get results in seconds, not minutes, with our optimized performance architecture.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Precision Focus</h3>
+                    <p class="feature-description">Every feature is crafted with surgical precision to address your specific needs. No bloat, no confusion, just pure functionality.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Download Page -->
+    <div class="page" id="downloadPage">
+        <button class="glossy-button back-button" onclick="showPage('homePage')">← Back</button>
+        
+        <div class="download-container">
+            <div class="download-hero">
+                <h1 class="download-title">Download Glacier</h1>
+                <p class="subtitle" style="margin-bottom: 2rem;">Get the latest version with all the newest features</p>
+                
+                <div class="tilt-image" onclick="downloadFile()">
+                    📦<br>
+                    <span style="font-size: 1rem; margin-top: 10px; display: block;">Click to Download</span>
+                </div>
+                
+                <button class="glossy-button secondary" onclick="downloadFile()" style="font-size: 1.2rem; padding: 20px 40px;">
+                    ⬇️ Download Now
+                </button>
+            </div>
+            
+            <div class="changelog-section">
+                <h2 class="changelog-title">📝 Recent Changes</h2>
+                <div id="changelogContainer">
+                    <!-- Changelogs will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification">
+        <div class="notification-title">All Systems Operational</div>
+        <div class="notification-text">Everything running smoothly!</div>
+    </div>
+    
+    <script>
+        // Global data storage (works on any hosting)
+        let appData = {
+            downloadUrl: 'https://example.com/download/glacier-latest.zip',
+            changelogs: [
+                {
+                    version: 'v1.2.0',
+                    content: '• Added new glacier algorithms\n• Improved performance by 30%\n• Fixed critical bugs\n• Enhanced user interface'
+                },
+                {
+                    version: 'v1.1.5',
+                    content: '• Security updates\n• Minor bug fixes\n• Optimized memory usage'
+                },
+                {
+                    version: 'v1.1.0',
+                    content: '• New features added\n• UI improvements\n• Better error handling'
+                }
+            ]
+        };
+        
+        // Load data from localStorage if available
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('glacierAppData');
+                if (saved) {
+                    appData = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.warn('Could not load saved data, using defaults');
+            }
+            updateDownloadUrlDisplay();
+            updateChangelogDisplay();
+            updateAdminChangelogList();
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            try {
+                localStorage.setItem('glacierAppData', JSON.stringify(appData));
+            } catch (e) {
+                console.warn('Could not save data to localStorage');
+            }
+        }
+        
+        // Page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update page-specific content
+            if (pageId === 'downloadPage') {
+                updateChangelogDisplay();
+            }
+        }
+        
+        // Download functionality
+        function downloadFile() {
+            if (appData.downloadUrl && appData.downloadUrl !== 'https://example.com/download/glacier-latest.zip') {
+                window.open(appData.downloadUrl, '_blank');
+            } else {
+                alert('Download link not configured. Please contact administrator.');
+            }
+        }
+        
+        // Update changelog display
+        function updateChangelogDisplay() {
+            const container = document.getElementById('changelogContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            appData.changelogs.forEach(changelog => {
+                const item = document.createElement('div');
+                item.className = 'changelog-item';
+                item.innerHTML = `
+                    <div class="changelog-version">${changelog.version}</div>
+                    <div class="changelog-content">${changelog.content.replace(/\n/g, '<br>')}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        // Security: Obfuscated authentication system
+        const _0x1f2a = ['QTNmajI4MQ==', 'keydown', 'ctrlKey', 'KeyQ', 'preventDefault', 'style', 'display', 'block', 'focus', 'value', 'toLowerCase', 'trim', 'none', 'getElementById', 'classList', 'add', 'remove', 'setTimeout'];
+        const _0x3b4c = _0x1f2a[0];
+        let _0x5d6e = false;
+        let _0x7f8g = '';
+        
+        // Decode function (obfuscated)
+        function _0xdec(str) {
+            try {
+                return atob(str);
+            } catch(e) {
+                return '';
+            }
+        }
+        
+        // Admin authentication function
+        function adminAuth() {
+            const input = document.getElementById('adminPassword');
+            const error = document.getElementById('errorMessage');
+            const adminLogin = document.getElementById('adminLogin');
+            const adminPanel = document.getElementById('adminPanel');
+            
+            // Security check with obfuscated comparison
+            const userInput = input.value.trim();
+            const validCode = _0xdec(_0x3b4c);
+            
+            // Multiple validation layers
+            if (userInput.length === 0) {
+                showError('Please enter an access code');
+                return;
+            }
+            
+            // Timing attack protection
+            let isValid = userInput.length === validCode.length;
+            for (let i = 0; i < Math.max(userInput.length, validCode.length); i++) {
+                isValid = (userInput.charAt(i) === validCode.charAt(i)) && isValid;
+            }
+            
+            if (isValid && userInput === validCode) {
+                // Success - show admin panel
+                adminLogin.style.display = 'none';
+                adminPanel.style.display = 'block';
+                input.value = '';
+                _0x5d6e = true;
+                loadAdminPanel();
+            } else {
+                // Failed authentication
+                showError('Invalid access code');
+                input.value = '';
+                // Rate limiting simulation
+                setTimeout(() => {
+                    input.disabled = false;
+                }, 1000);
+                input.disabled = true;
+            }
+        }
+        
+        // Load admin panel data
+        function loadAdminPanel() {
+            document.getElementById('downloadUrlInput').value = appData.downloadUrl;
+            updateAdminChangelogList();
+        }
+        
+        // Update download URL
+        function updateDownloadUrl() {
+            const input = document.getElementById('downloadUrlInput');
+            const url = input.value.trim();
+            
+            if (url === '') {
+                alert('Please enter a valid download URL');
+                return;
+            }
+            
+            appData.downloadUrl = url;
+            saveData();
+            alert('Download URL updated successfully!');
+        }
+        
+        function updateDownloadUrlDisplay() {
+            const input = document.getElementById('downloadUrlInput');
+            if (input) {
+                input.value = appData.downloadUrl;
+            }
+        }
+        
+        // Add new changelog
+        function addChangelog() {
+            const versionInput = document.getElementById('changelogVersion');
+            const contentInput = document.getElementById('changelogContent');
+            
+            const version = versionInput.value.trim();
+            const content = contentInput.value.trim();
+            
+            if (version === '' || content === '') {
+                alert('Please fill in both version and content fields');
+                return;
+            }
+            
+            // Add to beginning of array (newest first)
+            appData.changelogs.unshift({
+                version: version,
+                content: content
+            });
+            
+            saveData();
+            updateChangelogDisplay();
+            updateAdminChangelogList();
+            
+            // Clear inputs
+            versionInput.value = '';
+            contentInput.value = '';
+            
+            alert('Changelog added successfully!');
+        }
+        
+        // Update admin changelog list
+        function updateAdminChangelogList() {
+            const container = document.getElementById('changelogList');
+            if (!container) return;
+            
+            container.innerHTML = '<h4 style="color: #ffffff; margin-bottom: 1rem;">Existing Changelogs:</h4>';
+            
+            appData.changelogs.forEach((changelog, index) => {
+                const item = document.createElement('div');
+                item.className = 'changelog-admin-item';
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong style="color: #4A90E2;">${changelog.version}</strong>
+                        <button class="delete-btn" onclick="deleteChangelog(${index})">Delete</button>
+                    </div>
+                    <div style="color: #cccccc; font-size: 0.9rem;">${changelog.content.replace(/\n/g, '<br>')}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        // Delete changelog
+        function deleteChangelog(index) {
+            if (confirm('Are you sure you want to delete this changelog?')) {
+                appData.changelogs.splice(index, 1);
+                saveData();
+                updateChangelogDisplay();
+                updateAdminChangelogList();
+                alert('Changelog deleted successfully!');
+            }
+        }
+        
+        // Show error message
+        function showError(message) {
+            const error = document.getElementById('errorMessage');
+            error.textContent = message;
+            error.classList.add('show');
+            setTimeout(() => {
+                error.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Close admin panel
+        function closeAdmin() {
+            const overlay = document.getElementById('adminOverlay');
+            const adminLogin = document.getElementById('adminLogin');
+            const adminPanel = document.getElementById('adminPanel');
+            const input = document.getElementById('adminPassword');
+            
+            overlay.style.display = 'none';
+            adminLogin.style.display = 'block';
+            adminPanel.style.display = 'none';
+            input.value = '';
+            input.disabled = false;
+            _0x5d6e = false;
+            
+            const error = document.getElementById('errorMessage');
+            error.classList.remove('show');
+        }
+        
+        // Keyboard event listener for Ctrl+Q
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.code === 'KeyQ') {
+                e.preventDefault();
+                const overlay = document.getElementById('adminOverlay');
+                if (overlay.style.display !== 'block') {
+                    overlay.style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('adminPassword').focus();
+                    }, 100);
+                }
+            }
+            
+            // ESC to close
+            if (e.code === 'Escape') {
+                closeAdmin();
+            }
+        });
+        
+        // Enter key support for password input
+        document.getElementById('adminPassword').addEventListener('keydown', function(e) {
+            if (e.code === 'Enter') {
+                adminAuth();
+            }
+        });
+        
+        // Prevent right-click context menu on admin elements
+        document.getElementById('adminOverlay').addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // Clear password field on page refresh/unload (security)
+        window.addEventListener('beforeunload', function() {
+            const input = document.getElementById('adminPassword');
+            if (input) input.value = '';
+        });
+        
+        // Initialize app
+        window.addEventListener('load', function() {
+            loadData();
+        });
+        
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+        
+        // Dynamic notifications
+        const notifications = [
+            { title: "All Systems Operational", text: "Everything running smoothly!" },
+            { title: "Glacier 1.2.0 Out Now!", text: "Latest version with enhanced features." },
+            { title: "Hosting Speeds Improved by 30%", text: "Faster performance across all servers." }
+        ];
+        
+        let notificationIndex = 0;
+        
+        setInterval(() => {
+            notificationIndex = (notificationIndex + 1) % notifications.length;
+            const notification = document.querySelector('.notification');
+            const currentNotification = notifications[notificationIndex];
+            
+            notification.querySelector('.notification-title').textContent = currentNotification.title;
+            notification.querySelector('.notification-text').textContent = currentNotification.text;
+            
+            notification.style.animation = 'none';
+            notification.offsetHeight;
+            notification.style.animation = 'slideIn 0.5s ease forwards, slideOut 0.5s ease 4s forwards';
+        }, 8000);
+        
+        // Button click effects
+        document.querySelectorAll('.glossy-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    background: rgba(255,255,255,0.6);
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    left: ${e.offsetX - 10}px;
+                    top: ${e.offsetY - 10}px;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -717,6 +717,17 @@
             transform: translateY(-1px);
         }
         
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
         @keyframes slideIn {
             to { transform: translateX(0); }
         }
@@ -820,7 +831,10 @@
                 <h3>📥 Download Link Management</h3>
                 <label style="color: #ffffff; display: block; margin-bottom: 0.5rem;">Current Download URL:</label>
                 <input type="url" class="admin-input" id="downloadUrlInput" placeholder="https://example.com/download">
-                <button class="admin-button" onclick="updateDownloadUrl()">Update Download Link</button>
+                <button class="admin-button" onclick="updateDownloadUrl()">
+                    Update Download Link
+                    <div class="loading-spinner" id="downloadSpinner"></div>
+                </button>
             </div>
             
             <div class="admin-section">
@@ -830,7 +844,10 @@
                     <input type="text" class="admin-input" id="changelogVersion" placeholder="v1.2.0">
                     <label style="color: #ffffff; display: block; margin-bottom: 0.5rem;">Content:</label>
                     <textarea class="admin-textarea" id="changelogContent" placeholder="• Added new features&#10;• Fixed bugs&#10;• Improved performance"></textarea>
-                    <button class="admin-button" onclick="addChangelog()">Add Changelog</button>
+                    <button class="admin-button" onclick="addChangelog()">
+                        Add Changelog
+                        <div class="loading-spinner" id="changelogSpinner"></div>
+                    </button>
                 </div>
                 
                 <div id="changelogList">
@@ -920,46 +937,78 @@
     </div>
     
     <script>
-        // Global data storage (works on any hosting)
+        // Global data storage
         let appData = {
             downloadUrl: 'https://gofile.io/d/qtUQtv',
-            changelogs: [
-                {
-                    version: 'v1.2.0',
-                    content: '• Better Stability\n• Improved UNC to 35\n• Fixed bugs\n• Fully New Ui (UNFINISHED)'
-                },
-                {
-                    version: 'v1.0.1',
-                    content: '• 25 UNC\n• Minor bug fixes\n• Optimized Bridge'
-                },
-                {
-                    version: 'v1.0.0',
-                    content: '• Release\n• UI \n• 18 UNC'
-                }
-            ]
+            changelogs: []
         };
         
-        // Load data from localStorage if available
-        function loadData() {
+        // API functions
+        async function fetchData() {
             try {
-                const saved = localStorage.getItem('glacierAppData');
-                if (saved) {
-                    appData = JSON.parse(saved);
+                const response = await fetch('/api/data');
+                if (response.ok) {
+                    const data = await response.json();
+                    appData = data;
+                    return true;
                 }
-            } catch (e) {
-                console.warn('Could not load saved data, using defaults');
+            } catch (error) {
+                console.warn('Could not fetch server data, using defaults:', error);
             }
+            return false;
+        }
+        
+        async function saveData() {
+            try {
+                const response = await fetch('/api/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        password: _0xdec(_0x3b4c),
+                        data: appData
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.success;
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Server error');
+                }
+            } catch (error) {
+                console.error('Could not save data to server:', error);
+                alert('Failed to save changes: ' + error.message);
+                return false;
+            }
+        }
+        
+        // Load data on page load
+        async function loadData() {
+            const success = await fetchData();
             updateDownloadUrlDisplay();
             updateChangelogDisplay();
             updateAdminChangelogList();
-        }
-        
-        // Save data to localStorage
-        function saveData() {
-            try {
-                localStorage.setItem('glacierAppData', JSON.stringify(appData));
-            } catch (e) {
-                console.warn('Could not save data to localStorage');
+            
+            if (!success) {
+                // Fallback to default data
+                appData.changelogs = [
+                    {
+                        version: 'v1.2.0',
+                        content: '• Better Stability\n• Improved UNC to 35\n• Fixed bugs\n• Fully New Ui (UNFINISHED)'
+                    },
+                    {
+                        version: 'v1.0.1',
+                        content: '• 25 UNC\n• Minor bug fixes\n• Optimized Bridge'
+                    },
+                    {
+                        version: 'v1.0.0',
+                        content: '• Release\n• UI \n• 18 UNC'
+                    }
+                ];
+                updateChangelogDisplay();
             }
         }
         
@@ -1010,7 +1059,6 @@
         const _0x1f2a = ['QTNmajI4MQ==', 'keydown', 'ctrlKey', 'KeyQ', 'preventDefault', 'style', 'display', 'block', 'focus', 'value', 'toLowerCase', 'trim', 'none', 'getElementById', 'classList', 'add', 'remove', 'setTimeout'];
         const _0x3b4c = _0x1f2a[0];
         let _0x5d6e = false;
-        let _0x7f8g = '';
         
         // Decode function (obfuscated)
         function _0xdec(str) {
@@ -1019,6 +1067,18 @@
             } catch(e) {
                 return '';
             }
+        }
+        
+        // Show loading spinner
+        function showSpinner(spinnerId) {
+            const spinner = document.getElementById(spinnerId);
+            if (spinner) spinner.style.display = 'inline-block';
+        }
+        
+        // Hide loading spinner
+        function hideSpinner(spinnerId) {
+            const spinner = document.getElementById(spinnerId);
+            if (spinner) spinner.style.display = 'none';
         }
         
         // Admin authentication function
@@ -1070,7 +1130,7 @@
         }
         
         // Update download URL
-        function updateDownloadUrl() {
+        async function updateDownloadUrl() {
             const input = document.getElementById('downloadUrlInput');
             const url = input.value.trim();
             
@@ -1079,9 +1139,16 @@
                 return;
             }
             
+            showSpinner('downloadSpinner');
+            
             appData.downloadUrl = url;
-            saveData();
-            alert('Download URL updated successfully!');
+            const success = await saveData();
+            
+            hideSpinner('downloadSpinner');
+            
+            if (success) {
+                alert('Download URL updated successfully!');
+            }
         }
         
         function updateDownloadUrlDisplay() {
@@ -1092,7 +1159,7 @@
         }
         
         // Add new changelog
-        function addChangelog() {
+        async function addChangelog() {
             const versionInput = document.getElementById('changelogVersion');
             const contentInput = document.getElementById('changelogContent');
             
@@ -1104,21 +1171,30 @@
                 return;
             }
             
+            showSpinner('changelogSpinner');
+            
             // Add to beginning of array (newest first)
             appData.changelogs.unshift({
                 version: version,
                 content: content
             });
             
-            saveData();
-            updateChangelogDisplay();
-            updateAdminChangelogList();
+            const success = await saveData();
+            hideSpinner('changelogSpinner');
             
-            // Clear inputs
-            versionInput.value = '';
-            contentInput.value = '';
-            
-            alert('Changelog added successfully!');
+            if (success) {
+                updateChangelogDisplay();
+                updateAdminChangelogList();
+                
+                // Clear inputs
+                versionInput.value = '';
+                contentInput.value = '';
+                
+                alert('Changelog added successfully!');
+            } else {
+                // Revert the change if save failed
+                appData.changelogs.shift();
+            }
         }
         
         // Update admin changelog list
@@ -1143,13 +1219,19 @@
         }
         
         // Delete changelog
-        function deleteChangelog(index) {
+        async function deleteChangelog(index) {
             if (confirm('Are you sure you want to delete this changelog?')) {
-                appData.changelogs.splice(index, 1);
-                saveData();
-                updateChangelogDisplay();
-                updateAdminChangelogList();
-                alert('Changelog deleted successfully!');
+                const deletedItem = appData.changelogs.splice(index, 1)[0];
+                const success = await saveData();
+                
+                if (success) {
+                    updateChangelogDisplay();
+                    updateAdminChangelogList();
+                    alert('Changelog deleted successfully!');
+                } else {
+                    // Revert the change if save failed
+                    appData.changelogs.splice(index, 0, deletedItem);
+                }
             }
         }
         

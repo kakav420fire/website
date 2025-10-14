@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glacier - We do what you need</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .page {
+            display: none;
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .title {
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.02em;
+        }
+        
+        .subtitle {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            color: #e0e0e0;
+            font-weight: 400;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            line-height: 1.5;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .glossy-button {
+            position: relative;
+            padding: 16px 32px;
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.7) 50%,
+                rgba(255, 255, 255, 0.5) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.9),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glossy-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.5) 0%,
+                rgba(255, 255, 255, 0.2) 30%,
+                rgba(255, 255, 255, 0.1) 60%,
+                transparent 100%);
+            pointer-events: none;
+            border-radius: 10px 10px 50% 50%;
+        }
+        
+        .glossy-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.6),
+                rgba(255, 255, 255, 0.8),
+                rgba(255, 255, 255, 0.6),
+                transparent);
+            transform: skewX(-25deg);
+            transition: left 0.8s ease;
+            pointer-events: none;
+        }
+        
+        .glossy-button:hover::after {
+            left: 100%;
+        }
+        
+        .glossy-button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.8) 50%,
+                rgba(255, 255, 255, 0.6) 100%);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.25),
+                0 10px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 1px rgba(255, 255, 255, 1),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glossy-button:active {
+            transform: translateY(0px);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0.6) 50%,
+                rgba(255, 255, 255, 0.4) 100%);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 1px rgba(255, 255, 255, 0.8),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+        }
+        
+        .secondary {
+            background: linear-gradient(145deg, 
+                rgba(74, 144, 226, 0.9) 0%,
+                rgba(74, 144, 226, 0.7) 50%,
+                rgba(74, 144, 226, 0.5) 100%);
+            color: white;
+            border-color: rgba(74, 144, 226, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .secondary:hover {
+            background: linear-gradient(145deg, 
+                rgba(74, 144, 226, 0.95) 0%,
+                rgba(74, 144, 226, 0.8) 50%,
+                rgba(74, 144, 226, 0.6) 100%);
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 1000;
+            padding: 12px 20px;
+            font-size: 1rem;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        .particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-delay: -2s; }
+        .particle:nth-child(3) { width: 3px; height: 3px; left: 30%; animation-delay: -1s; }
+        .particle:nth-child(4) { width: 5px; height: 5px; left: 40%; animation-delay: -3s; }
+        .particle:nth-child(5) { width: 4px; height: 4px; left: 50%; animation-delay: -1.5s; }
+        .particle:nth-child(6) { width: 7px; height: 7px; left: 60%; animation-delay: -2.5s; }
+        .particle:nth-child(7) { width: 3px; height: 3px; left: 70%; animation-delay: -0.5s; }
+        .particle:nth-child(8) { width: 5px; height: 5px; left: 80%; animation-delay: -4s; }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            50% { 
+                transform: translateY(-20px) translateX(20px) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
+        
+        .features {
+            background: transparent;
+            padding: 4rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(255, 255, 255, 0.15) 100%);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-description {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        
+        .download-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .download-hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .download-title {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tilt-image {
+            width: 500px;
+            height: 300px;
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            background-size: cover;
+            background-position: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #ffffff;
+            margin: 2rem auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tilt-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .tilt-image:hover {
+            transform: rotateY(10deg) rotateX(5deg) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .changelog-section {
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .changelog-title {
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .changelog-item {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .changelog-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .changelog-version {
+            color: #4A90E2;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .changelog-content {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            color: #ffffff;
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            animation: slideIn 0.5s ease 2s forwards, slideOut 0.5s ease 6s forwards;
+            z-index: 1000;
+            max-width: 300px;
+            overflow: hidden;
+        }
+        
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%);
+            border-radius: 16px 16px 50% 50%;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+        
+        .notification-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            color: #cccccc;
+        }
+        
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes slideOut {
+            to { transform: translateX(400px); }
+        }
+        
+        @media (max-width: 768px) {
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .glossy-button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .notification {
+                left: 1rem;
+                right: 1rem;
+                max-width: none;
+            }
+            
+            .download-container {
+                padding: 1rem;
+            }
+            
+            .tilt-image {
+                width: 250px;
+                height: 150px;
+            }
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeOut 1s ease 1.5s forwards;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4A90E2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <div class="dark-overlay"></div>
+    
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <div class="page active" id="homePage">
+        <div class="container">
+            <h1 class="title">Glacier</h1>
+            <p class="subtitle">Exploiting made easy and fun.</p>
+            
+            <div class="button-container">
+                <a href="#" class="glossy-button" onclick="showPage('downloadPage')">Download</a>
+                <a href="https://discord.gg/glacierstudios" class="glossy-button secondary" target="_blank">Discord</a>
+            </div>
+        </div>
+        
+        <section class="features" id="features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">❄️</div>
+                    <h3 class="feature-title">Crystal Clear</h3>
+                    <p class="feature-description">Experience unparalleled clarity in every interaction. Our glacier-inspired interface cuts through complexity to deliver exactly what you need.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Lightning Fast</h3>
+                    <p class="feature-description">Speed that matches the pace of your ambitions. Get results in seconds, not minutes, with our optimized performance architecture.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Precision Focus</h3>
+                    <p class="feature-description">Every feature is crafted with surgical precision to address your specific needs. No bloat, no confusion, just pure functionality.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <div class="page" id="downloadPage">
+        <button class="glossy-button back-button" onclick="showPage('homePage')">← Back</button>
+        
+        <div class="download-container">
+            <div class="download-hero">
+                <h1 class="download-title">Download Glacier</h1>
+                <p class="subtitle" style="margin-bottom: 2rem;">Get the latest version with all the newest features</p>
+                
+                <div class="tilt-image" id="downloadPreview">
+                    📦<br>
+                    <span style="font-size: 1rem; margin-top: 10px; display: block;">Choose your download below</span>
+                </div>
+                
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
+                    <button class="glossy-button" onclick="downloadFile1()" style="font-size: 1.2rem; padding: 20px 40px;">
+                        ⬇️ <span id="button1Label">Download Version 1</span>
+                    </button>
+                    <button class="glossy-button secondary" onclick="downloadFile2()" style="font-size: 1.2rem; padding: 20px 40px;">
+                        ⬇️ <span id="button2Label">Download Version 2</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="changelog-section">
+                <h2 class="changelog-title">📝 Recent Changes</h2>
+                <div id="changelogContainer"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification">
+        <div class="notification-title">All Systems Operational</div>
+        <div class="notification-text">Everything running smoothly!</div>
+    </div>
+    
+    <script>
+        // ===== EASY CONFIGURATION =====
+        // Change these URLs to update images and downloads
+        const CONFIG = {
+            // Background image
+            backgroundImage: 'https://cdn.discordapp.com/attachments/1411267411201490957/1424563243824709712/2251490.png?ex=68ea5628&is=68e904a8&hm=1b916a76b3a415fa24dc1313e35d763685680d2c0df6795828cce1de52bc6316&',
+            
+            // Download preview image
+            downloadPreviewImage: 'https://cdn.discordapp.com/attachments/1411267411201490957/1421307857760030740/Screenshot_2025-09-26_200609.png?ex=68ea5bd7&is=68e90a57&hm=8ab87d1640c17a0d08521327ac3215817f7a301058555c8325af7b9a71999e75&',
+            
+            // Download links for each button
+            downloadLink1: 'https://gofile.io/d/Yc8U6p',
+            downloadLink2: 'https://gofile.io/d/lrXKB6',
+            
+            // Button labels
+            buttonLabel1: 'Download Executor',
+            buttonLabel2: 'Download External (pass is 1)'
+        };
+        // ================================
+        
+        let appData = {
+            changelogs: []
+        };
+        
+        function loadData() {
+            document.body.style.background = `#000 url('${CONFIG.backgroundImage}') no-repeat center center fixed`;
+            document.body.style.backgroundSize = 'cover';
+            
+            const previewEl = document.getElementById('downloadPreview');
+            if (previewEl) {
+                previewEl.style.backgroundImage = `linear-gradient(145deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%), url('${CONFIG.downloadPreviewImage}')`;
+            }
+            
+            document.getElementById('button1Label').textContent = CONFIG.buttonLabel1;
+            document.getElementById('button2Label').textContent = CONFIG.buttonLabel2;
+            
+            appData.changelogs = [
+                {
+                    version: 'EXTERNAL v1.0.0',
+                    content: '• Release\n • Combat Section With Aimbot\n • Esp Section and more'
+                },
+                {
+                    version: 'EXECUTOR v1.2.11',
+                    content: '• Updated to latest version of Roblox'
+                },
+                {
+                    version: 'EXECUTOR v1.2.1',
+                    content: '• Ui Additions (UNFINISHED)\n• Improved UNC to 44\n• Improved sUNC to 27\n* tons and tons of bugfixes'
+                },
+                {
+                    version: 'EXECUTOR v1.2.0',
+                    content: '• Better Stability\n• Improved UNC to 35\n• Fixed bugs\n• Fully New Ui (UNFINISHED)'
+                },
+                {
+                    version: 'EXECUTOR v1.0.1',
+                    content: '• 25 UNC\n• Minor bug fixes\n• Optimized Bridge'
+                },
+                {
+                    version: 'EXECUTOR v1.0.0',
+                    content: '• Release\n• UI \n• 18 UNC'
+                }
+            ];
+            updateChangelogDisplay();
+        }
+        
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            document.getElementById(pageId).classList.add('active');
+            
+            if (pageId === 'downloadPage') {
+                updateChangelogDisplay();
+            }
+        }
+        
+        function downloadFile1() {
+            if (CONFIG.downloadLink1) {
+                window.open(CONFIG.downloadLink1, '_blank');
+            } else {
+                alert('Download link not configured.');
+            }
+        }
+        
+        function downloadFile2() {
+            if (CONFIG.downloadLink2) {
+                window.open(CONFIG.downloadLink2, '_blank');
+            } else {
+                alert('Download link not configured.');
+            }
+        }
+        
+        function updateChangelogDisplay() {
+            const container = document.getElementById('changelogContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            appData.changelogs.forEach(changelog => {
+                const item = document.createElement('div');
+                item.className = 'changelog-item';
+                item.innerHTML = `
+                    <div class="changelog-version">${changelog.version}</div>
+                    <div class="changelog-content">${changelog.content.replace(/\n/g, '<br>')}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        window.addEventListener('load', function() {
+            loadData();
+        });
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+        
+        const notifications = [
+            { title: "All Systems Operational", text: "Everything running smoothly!" },
+            { title: "Glacier 1.2.1 Out Now!", text: "Latest version with enhanced features." },
+            { title: "Hosting Speeds Improved by 30%", text: "Faster performance across all servers." }
+        ];
+        
+        let notificationIndex = 0;
+        
+        setInterval(() => {
+            notificationIndex = (notificationIndex + 1) % notifications.length;
+            const notification = document.querySelector('.notification');
+            const currentNotification = notifications[notificationIndex];
+            
+            notification.querySelector('.notification-title').textContent = currentNotification.title;
+            notification.querySelector('.notification-text').textContent = currentNotification.text;
+            
+            notification.style.animation = 'none';
+            notification.offsetHeight;
+            notification.style.animation = 'slideIn 0.5s ease forwards, slideOut 0.5s ease 4s forwards';
+        }, 8000);
+        
+        document.querySelectorAll('.glossy-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    background: rgba(255,255,255,0.6);
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    left: ${e.offsetX - 10}px;
+                    top: ${e.offsetY - 10}px;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+    </script>
+</body>
+</html>

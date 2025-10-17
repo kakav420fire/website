@@ -1,4 +1,4 @@
-// api/update.js
+// api/update.js waza
 import fs from 'fs';
 import path from 'path';
 

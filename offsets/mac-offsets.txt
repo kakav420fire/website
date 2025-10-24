@@ -1,0 +1,4 @@
+// Roblox Version: version-e0126463331444db
+
+namespace offsets {
+}

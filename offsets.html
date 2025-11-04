@@ -13,8 +13,7 @@
 
   <div class="maintenance-overlay" id="maintenanceOverlay" style="display: none;">
     <div class="maintenance-content">
-      <h1 class="maintenance-title">🎃 Under Maintenance</h1>
-      <p class="maintenance-text">We're currently performing scheduled maintenance.<br>Check back later!</p>
+      <h1 class="maintenance-title">Under Maintenance</h1> <p class="maintenance-text">We're currently performing scheduled maintenance.<br>Check back later!</p>
       <button class="glossy-button" onclick="location.reload()">Refresh Site</button>
     </div>
   </div>
@@ -30,10 +29,6 @@
   </nav>
 
   <div class="dark-overlay"></div>
-  <div class="pumpkin">🎃</div>
-  <div class="pumpkin">🎃</div>
-  <div class="pumpkin">🎃</div>
-
   <div class="particles">
     <div class="particle"></div><div class="particle"></div><div class="particle"></div>
     <div class="particle"></div><div class="particle"></div><div class="particle"></div>
@@ -215,7 +210,7 @@
 
     async function checkMaintenance() {
       try {
-        const response = await fetch('https://pastebin.com/raw/xpxvHe1N');
+        const response = await fetch('maintenance.txt?t=' + Date.now()); // Fixed: Changed URL to maintenance.txt
         const text = await response.text();
         const isMaintenance = text.trim().toLowerCase() === 'true';
         

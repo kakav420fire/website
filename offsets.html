@@ -224,7 +224,7 @@
 
     async function checkMaintenance() {
       try {
-        const response = await fetch('https://pastebin.com/raw/xpxvHe1N');
+        const response = await fetch('maintenance.txt?t=' + Date.now());
         const text = await response.text();
         const isMaintenance = text.trim().toLowerCase() === 'true';
         

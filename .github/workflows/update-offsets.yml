@@ -1,0 +1,66 @@
+name: Update WEAO Offsets
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-offsets:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Fetch WEAO data
+        run: |
+          # Create offsets directory if it doesn't exist
+          mkdir -p offsets
+          
+          # Fetch current versions
+          curl -H "User-Agent: WEAO-3PService" \
+               https://weao.xyz/api/versions/current \
+               -o offsets/versions.json
+          
+          # Extract Windows and Mac versions
+          WINDOWS_VERSION=$(cat offsets/versions.json | grep -o '"Windows":"[^"]*"' | cut -d'"' -f4)
+          MAC_VERSION=$(cat offsets/versions.json | grep -o '"Mac":"[^"]*"' | cut -d'"' -f4)
+          
+          echo "Windows version: $WINDOWS_VERSION"
+          echo "Mac version: $MAC_VERSION"
+          
+          # Fetch Windows offsets
+          if [ ! -z "$WINDOWS_VERSION" ]; then
+            curl -H "User-Agent: WEAO-3PService" \
+                 "https://weao.xyz/api/offsets/$WINDOWS_VERSION" \
+                 -o offsets/windows-offsets.json
+            
+            # Create timestamp file for Windows
+            echo "{\"timestamp\":$(date +%s)000,\"version\":\"$WINDOWS_VERSION\"}" > offsets/last-update.json
+          fi
+          
+          # Fetch Mac offsets
+          if [ ! -z "$MAC_VERSION" ]; then
+            curl -H "User-Agent: WEAO-3PService" \
+                 "https://weao.xyz/api/offsets/$MAC_VERSION" \
+                 -o offsets/mac-offsets.json
+            
+            # Create timestamp file for Mac
+            echo "{\"timestamp\":$(date +%s)000,\"version\":\"$MAC_VERSION\"}" > offsets/last-update-mac.json
+          fi
+          
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --quiet offsets/ || echo "changed=true" >> $GITHUB_OUTPUT
+          
+      - name: Commit and push if changed
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add offsets/
+          git commit -m "Update offsets from WEAO API"
+          git push

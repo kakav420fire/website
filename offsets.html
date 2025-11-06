@@ -95,20 +95,23 @@
 
     const PLATFORM_CONFIG = {
       windows: {
-        versionApi: 'https://api.allorigins.win/raw?url=https://clientsettingscdn.roblox.com/v2/client-version/WindowsPlayer',
-        offsetsPath: 'offsets/windows-offsets.txt',
+        versionsPath: 'offsets/versions.json',
+        offsetsPath: 'offsets/windows-offsets.json',
         updateTrackerPath: 'offsets/last-update.json',
+        versionKey: 'Windows',
         title: 'Windows Offsets'
       },
       mac: {
-        versionApi: 'https://api.allorigins.win/raw?url=https://clientsettingscdn.roblox.com/v2/client-version/MacPlayer',
-        offsetsPath: 'offsets/mac-offsets.txt',
+        versionsPath: 'offsets/versions.json',
+        offsetsPath: 'offsets/mac-offsets.json',
         updateTrackerPath: 'offsets/last-update-mac.json',
+        versionKey: 'Mac',
         title: 'Mac Offsets'
       }
     };
 
     let currentPlatform = 'windows';
+    let cachedVersionData = null;
 
     function setStatus(status, version, box, statusEl, textEl) {
       textEl.textContent = version;
@@ -119,16 +122,40 @@
         'Error';
     }
 
-    async function tryFetchVersion(url) {
+    async function fetchFromWEAO(endpoint) {
+      // Option 1: Use your backend proxy
+      const proxyUrl = `${BACKEND_PROXY}?endpoint=${encodeURIComponent(endpoint)}`;
+      
       try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        if (url.includes('clientsettings')) {
-          const data = await res.json();
-          return data.clientVersionUpload || data.version || null;
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } catch (e) {
+        console.error('Backend proxy failed:', e);
+        
+        // Option 2: Try direct fetch (will fail with CORS but worth trying)
+        try {
+          const directResponse = await fetch(`${WEAO_API_BASE}${endpoint}`, {
+            headers: {
+              'User-Agent': 'WEAO-3PService'
+            }
+          });
+          if (!directResponse.ok) throw new Error(`HTTP ${directResponse.status}`);
+          return await directResponse.json();
+        } catch (directError) {
+          console.error('Direct fetch also failed:', directError);
+          throw new Error('Cannot access WEAO API - need backend proxy');
         }
-        return (await res.text()).trim();
-      } catch {
+      }
+    }
+
+    async function fetchVersionData() {
+      try {
+        const data = await fetchFromWEAO('/versions/current');
+        cachedVersionData = data;
+        return data;
+      } catch (e) {
+        console.error('Failed to fetch version data:', e);
         return null;
       }
     }
@@ -142,8 +169,12 @@
       lastChecked.textContent = new Date().toLocaleString();
 
       try {
-        const currentVersion = await tryFetchVersion(config.versionApi);
-        if (!currentVersion) throw new Error('API failed');
+        const versionData = await fetchVersionData();
+        if (!versionData || !versionData[config.platformKey]) {
+          throw new Error('API failed');
+        }
+
+        const currentVersion = versionData[config.platformKey];
 
         let globalUpdateTime = 0;
         let globalVersion = null;
@@ -196,15 +227,35 @@
 
     async function loadOffsets() {
       const config = PLATFORM_CONFIG[currentPlatform];
+      const offsetsContent = document.getElementById('offsetsContent');
+      
       try {
-        const res = await fetch(config.offsetsPath + '?t=' + Date.now());
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const txt = await res.text();
-        if (!txt.trim()) throw new Error('Empty file');
-        document.getElementById('offsetsContent').innerHTML = highlightCppSyntax(txt);
+        // Get version from cached data or fetch new
+        const versionData = cachedVersionData || await fetchVersionData();
+        if (!versionData || !versionData[config.platformKey]) {
+          throw new Error('Failed to get version');
+        }
+
+        const version = versionData[config.platformKey];
+        
+        // Fetch offsets for this version
+        const offsetsData = await fetchFromWEAO(`/offsets/${version}`);
+        
+        if (!offsetsData || !offsetsData.offsets) {
+          throw new Error('Invalid offsets data');
+        }
+
+        // Format offsets as C++ code
+        let offsetsText = `namespace offsets {\n`;
+        for (const [key, value] of Object.entries(offsetsData.offsets)) {
+          offsetsText += `    constexpr uintptr_t ${key} = ${value};\n`;
+        }
+        offsetsText += `}`;
+
+        offsetsContent.innerHTML = highlightCppSyntax(offsetsText);
       } catch (e) {
-        document.getElementById('offsetsContent').innerHTML =
-          `<span style="color:#ff6b6b;">Error loading offsets: ${e.message}<br>File missing: ${config.offsetsPath}</span>`;
+        offsetsContent.innerHTML =
+          `<span style="color:#ff6b6b;">Error loading offsets: ${e.message}</span>`;
       }
     }
 

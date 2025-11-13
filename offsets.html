@@ -95,14 +95,14 @@
 
     const PLATFORM_CONFIG = {
       windows: {
-        versionsPath: 'offsets/versions.json',
+        versionUrl: 'https://gabkoss.lol/versions/windows.txt',
         offsetsPath: 'offsets/windows-offsets.json',
         updateTrackerPath: 'offsets/last-update.json',
         versionKey: 'Windows',
         title: 'Windows Offsets'
       },
       mac: {
-        versionsPath: 'offsets/versions.json',
+        versionUrl: 'https://gabkoss.lol/versions/mac.txt',
         offsetsPath: 'offsets/mac-offsets.json',
         updateTrackerPath: 'offsets/last-update-mac.json',
         versionKey: 'Mac',
@@ -122,38 +122,30 @@
         'Error';
     }
 
-    async function fetchFromWEAO(endpoint) {
-      // Option 1: Use your backend proxy
-      const proxyUrl = `${BACKEND_PROXY}?endpoint=${encodeURIComponent(endpoint)}`;
+    async function fetchVersionForPlatform(platform) {
+      const config = PLATFORM_CONFIG[platform];
       
       try {
-        const response = await fetch(proxyUrl);
+        const response = await fetch(config.versionUrl + '?t=' + Date.now());
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
+        const version = await response.text();
+        return version.trim();
       } catch (e) {
-        console.error('Backend proxy failed:', e);
-        
-        // Option 2: Try direct fetch (will fail with CORS but worth trying)
-        try {
-          const directResponse = await fetch(`${WEAO_API_BASE}${endpoint}`, {
-            headers: {
-              'User-Agent': 'WEAO-3PService'
-            }
-          });
-          if (!directResponse.ok) throw new Error(`HTTP ${directResponse.status}`);
-          return await directResponse.json();
-        } catch (directError) {
-          console.error('Direct fetch also failed:', directError);
-          throw new Error('Cannot access WEAO API - need backend proxy');
-        }
+        console.error(`Failed to fetch ${platform} version:`, e);
+        return null;
       }
     }
 
     async function fetchVersionData() {
       try {
-        const data = await fetchFromWEAO('/versions/current');
-        cachedVersionData = data;
-        return data;
+        const windowsVersion = await fetchVersionForPlatform('windows');
+        const macVersion = await fetchVersionForPlatform('mac');
+        
+        cachedVersionData = {
+          Windows: windowsVersion,
+          Mac: macVersion
+        };
+        return cachedVersionData;
       } catch (e) {
         console.error('Failed to fetch version data:', e);
         return null;
@@ -170,11 +162,11 @@
 
       try {
         const versionData = await fetchVersionData();
-        if (!versionData || !versionData[config.platformKey]) {
+        if (!versionData || !versionData[config.versionKey]) {
           throw new Error('API failed');
         }
 
-        const currentVersion = versionData[config.platformKey];
+        const currentVersion = versionData[config.versionKey];
 
         let globalUpdateTime = 0;
         let globalVersion = null;
@@ -220,7 +212,7 @@
       res = res.replace(/\b(0x[0-9A-Fa-f]+)\b/g, '<span class="syntax-hex">$1</span>');
       res = res.replace(/\b(namespace|inline|constexpr)\b/g, '<span class="syntax-keyword">$1</span>');
       res = res.replace(/\b(uintptr_t)\b/g, '<span class="syntax-type">$1</span>');
-      res = res.replace(/\b([A-Z][a-zA-Z0-9_]*)\b(\s*=)/g, '<span class="syntax-identifier">$1</span>$2>');
+      res = res.replace(/\b([A-Z][a-zA-Z0-9_]*)\b(\s*=)/g, '<span class="syntax-identifier">$1</span>$2');
       res = res.replace(/([{}])/g, '<span class="syntax-brace">$1</span>');
       return res;
     }
@@ -232,14 +224,16 @@
       try {
         // Get version from cached data or fetch new
         const versionData = cachedVersionData || await fetchVersionData();
-        if (!versionData || !versionData[config.platformKey]) {
+        if (!versionData || !versionData[config.versionKey]) {
           throw new Error('Failed to get version');
         }
 
-        const version = versionData[config.platformKey];
+        const version = versionData[config.versionKey];
         
-        // Fetch offsets for this version
-        const offsetsData = await fetchFromWEAO(`/offsets/${version}`);
+        // Fetch offsets from local JSON file
+        const response = await fetch(config.offsetsPath + '?t=' + Date.now());
+        if (!response.ok) throw new Error('Failed to fetch offsets file');
+        const offsetsData = await response.json();
         
         if (!offsetsData || !offsetsData.offsets) {
           throw new Error('Invalid offsets data');

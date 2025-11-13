@@ -96,14 +96,14 @@
     const PLATFORM_CONFIG = {
       windows: {
         versionUrl: 'https://raw.githubusercontent.com/g4bigtjs/myportfolio/main/versions/windows.txt',
-        offsetsPath: 'offsets/windows-offsets.json',
+        offsetsPath: 'offsets/windows-offsets.txt',
         updateTrackerPath: 'offsets/last-update.json',
         versionKey: 'Windows',
         title: 'Windows Offsets'
       },
       mac: {
         versionUrl: 'https://raw.githubusercontent.com/g4bigtjs/myportfolio/main/versions/mac.txt',
-        offsetsPath: 'offsets/mac-offsets.json',
+        offsetsPath: 'offsets/mac-offsets.txt',
         updateTrackerPath: 'offsets/last-update-mac.json',
         versionKey: 'Mac',
         title: 'Mac Offsets'
@@ -173,12 +173,15 @@
         try {
           const trackerRes = await fetch(config.updateTrackerPath + '?t=' + Date.now());
           if (trackerRes.ok) {
-            const trackerData = await trackerRes.json();
-            globalUpdateTime = trackerData.timestamp || 0;
-            globalVersion = trackerData.version || null;
+            const text = await trackerRes.text();
+            if (text.trim()) {
+              const trackerData = JSON.parse(text);
+              globalUpdateTime = trackerData.timestamp || 0;
+              globalVersion = trackerData.version || null;
+            }
           }
         } catch (e) {
-          console.warn('Could not fetch global update tracker:', e);
+          console.warn('Could not fetch or parse global update tracker:', e);
         }
 
         let status = 'current';
@@ -233,7 +236,11 @@
         // Fetch offsets from local JSON file
         const response = await fetch(config.offsetsPath + '?t=' + Date.now());
         if (!response.ok) throw new Error('Failed to fetch offsets file');
-        const offsetsData = await response.json();
+        
+        const text = await response.text();
+        if (!text.trim()) throw new Error('Empty offsets file');
+        
+        const offsetsData = JSON.parse(text);
         
         if (!offsetsData || !offsetsData.offsets) {
           throw new Error('Invalid offsets data');

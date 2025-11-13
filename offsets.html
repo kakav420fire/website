@@ -97,14 +97,14 @@
       windows: {
         versionUrl: 'https://raw.githubusercontent.com/g4bigtjs/myportfolio/main/versions/windows.txt',
         offsetsPath: 'offsets/windows-offsets.txt',
-        updateTrackerPath: 'offsets/last-update.json',
+        updateTrackerPath: 'offsets/last-update.txt',
         versionKey: 'Windows',
         title: 'Windows Offsets'
       },
       mac: {
         versionUrl: 'https://raw.githubusercontent.com/g4bigtjs/myportfolio/main/versions/mac.txt',
         offsetsPath: 'offsets/mac-offsets.txt',
-        updateTrackerPath: 'offsets/last-update-mac.json',
+        updateTrackerPath: 'offsets/last-update-mac.txt',
         versionKey: 'Mac',
         title: 'Mac Offsets'
       }
@@ -175,9 +175,10 @@
           if (trackerRes.ok) {
             const text = await trackerRes.text();
             if (text.trim()) {
-              const trackerData = JSON.parse(text);
-              globalUpdateTime = trackerData.timestamp || 0;
-              globalVersion = trackerData.version || null;
+              // Format: timestamp|version (e.g., "1731513600000|version-xxx")
+              const parts = text.trim().split('|');
+              globalUpdateTime = parseInt(parts[0]) || 0;
+              globalVersion = parts[1] || null;
             }
           }
         } catch (e) {
@@ -233,22 +234,34 @@
 
         const version = versionData[config.versionKey];
         
-        // Fetch offsets from local JSON file
+        // Fetch offsets from local TXT file
         const response = await fetch(config.offsetsPath + '?t=' + Date.now());
         if (!response.ok) throw new Error('Failed to fetch offsets file');
         
         const text = await response.text();
         if (!text.trim()) throw new Error('Empty offsets file');
         
-        const offsetsData = JSON.parse(text);
+        // Parse the TXT format: each line is "NAME=0xVALUE"
+        const lines = text.trim().split('\n');
+        const offsets = {};
         
-        if (!offsetsData || !offsetsData.offsets) {
-          throw new Error('Invalid offsets data');
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('//')) continue;
+          
+          const [name, value] = trimmed.split('=').map(s => s.trim());
+          if (name && value) {
+            offsets[name] = value;
+          }
+        }
+        
+        if (Object.keys(offsets).length === 0) {
+          throw new Error('No offsets found in file');
         }
 
         // Format offsets as C++ code
         let offsetsText = `namespace offsets {\n`;
-        for (const [key, value] of Object.entries(offsetsData.offsets)) {
+        for (const [key, value] of Object.entries(offsets)) {
           offsetsText += `    constexpr uintptr_t ${key} = ${value};\n`;
         }
         offsetsText += `}`;

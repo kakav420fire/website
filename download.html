@@ -233,7 +233,7 @@
             const notificationText = document.querySelector('.notification .notification-text:last-child');
 
             if (execVersion) {
-                executorDropdownItem.querySelector('.item-version').textContent = `v${execVersion}`;
+                executorDropdownItem.querySelector('.item-version').textContent = `${execVersion}`;
                 notificationText.textContent = `Glacier ${execVersion} out now!`;
             } else {
                 notificationText.textContent = `Glacier loading...`;
@@ -241,7 +241,7 @@
             }
 
             if (externalVersion) {
-                externalDropdownItem.querySelector('.item-version').textContent = `v${externalVersion}`;
+                externalDropdownItem.querySelector('.item-version').textContent = `${externalVersion}`;
             } else {
                 console.warn('Failed to update External version for dropdown.');
             }
@@ -322,4 +322,5 @@
         });
     </script>
 </body>
+
 </html>

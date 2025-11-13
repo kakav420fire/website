@@ -1309,6 +1309,7 @@ body {
         var(--banana-yellow) 100%);
     background-size: 300% 100%;
     border: 3px solid white;
+    min-width: 450px;
     border-radius: 12px;
     color: white;
     text-decoration: none;

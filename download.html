@@ -66,8 +66,7 @@
                                 <div class="item-header">
                                     <div class="item-left">
                                         <span class="item-name">Glacier Executor</span>
-                                        <span class="item-version">v3.0.1b</span>
-                                    </div>
+                                        <span class="item-version">v3.0.1b</span> </div>
                                     <span class="badge updated-badge">Updated</span>
                                 </div>
                                 <div class="item-stats">
@@ -86,8 +85,7 @@
                                 <div class="item-header">
                                     <div class="item-left">
                                         <span class="item-name">Glacier External</span>
-                                        <span class="item-version">v1.2b</span>
-                                    </div>
+                                        <span class="item-version">v1.2b</span> </div>
                                     <span class="badge updated-badge">Updated</span>
                                 </div>
                                 <div class="item-stats">
@@ -130,21 +128,7 @@
             <div class="changelog-section">
                 <h2 class="changelog-title">Latest Changes</h2>
                 <div id="changelogContainer">
-                    <div class="changelog-item">
-                        <div class="changelog-version">Executor - Version 3.0.1</div>
-                        <div class="changelog-content">
-                            <p>• Improved Monaco Editor</p>
-                            <p>• Small Ui Changes</p>
-                            <p>• 57 -> 59 unc now</p>
-                        </div>
-                    </div>
-                    
-                    <div class="changelog-item">
-                        <div class="changelog-version">External - Version 1.1.0</div>
-                        <div class="changelog-content">
-                            <p>• Updated to latest LIVE roblox version.</p>
-                        </div>
-                    </div>
+                    <div class="changelog-content"><p>Loading latest changes...</p></div>
                 </div>
             </div>
         </div>
@@ -153,10 +137,138 @@
     <div class="notification">
         <div class="notification-title">All Systems Operational</div>
         <div class="notification-text">Everything running smoothly!</div>
-        <div class="notification-text">Glacier 3.0.1 out now!</div>
-    </div>
+        <div class="notification-text">Glacier loading...</div> </div>
 
     <script>
+        // --- CORRECTED URL MAPPING ---
+        const EXECUTOR_VERSION_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/versionexec';
+        const EXTERNAL_VERSION_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/version';
+        
+        // Corrected Changelog URLs based on your latest input
+        const EXECUTOR_CHANGELOG_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/changelogsexec.txt';
+        const EXTERNAL_CHANGELOG_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/changelogs'; 
+
+        // --- Core Functions for Dynamic Content ---
+
+        /**
+         * Fetches plain text content from a URL, appending a timestamp to prevent caching.
+         * @param {string} url The URL to fetch.
+         * @returns {Promise<string|null>} The fetched text or null on failure.
+         */
+        async function fetchText(url) {
+            try {
+                const response = await fetch(url + '?t=' + Date.now());
+                if (!response.ok) {
+                    console.error(`HTTP error fetching ${url}: status ${response.status}`);
+                    return null;
+                }
+                return await response.text();
+            } catch (error) {
+                console.error(`Network error fetching ${url}:`, error);
+                return null;
+            }
+        }
+
+        /**
+         * Converts raw changelog content into the required HTML structure with a custom title.
+         * Keeps all lines of the fetched content in the body.
+         * @param {string} productName 'Executor' or 'External'.
+         * @param {string} version The version string (e.g., '3.0.1b').
+         * @param {string} rawText The raw changelog text.
+         * @returns {string} The HTML for a single changelog item.
+         */
+        function createChangelogItem(productName, version, rawText) {
+            const lines = rawText.trim().split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return '';
+
+            // Keep ALL lines of content.
+            const contentLines = lines;
+            
+            // Custom title format: "Executor - Version 3.0.1b"
+            const versionTitle = `${productName} - Version ${version}`;
+
+            let contentHtml = '';
+            contentLines.forEach(line => {
+                // Wrap each line in <p> tags
+                contentHtml += `<p>${line.trim()}</p>`;
+            });
+
+            return `
+                <div class="changelog-item">
+                    <div class="changelog-version">${versionTitle}</div>
+                    <div class="changelog-content">
+                        ${contentHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Main function to fetch all dynamic content and update the site.
+         */
+        async function updateSiteContent() {
+            console.log('Fetching latest versions and changelogs...');
+            
+            // Fetch all required data in parallel
+            const [
+                executorVersionText, 
+                externalVersionText, 
+                executorChangelogText, 
+                externalChangelogText
+            ] = await Promise.all([
+                fetchText(EXECUTOR_VERSION_URL),
+                fetchText(EXTERNAL_VERSION_URL),
+                fetchText(EXECUTOR_CHANGELOG_URL),
+                fetchText(EXTERNAL_CHANGELOG_URL)
+            ]);
+
+            // Assuming version files contain only the version number as the first line
+            const execVersion = executorVersionText ? executorVersionText.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0)[0] : null;
+            const externalVersion = externalVersionText ? externalVersionText.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0)[0] : null;
+            
+            // --- Update Dropdown Versions and Notification ---
+            
+            const executorDropdownItem = document.querySelector('.dropdown-item:nth-child(1)');
+            const externalDropdownItem = document.querySelector('.dropdown-item:nth-child(2)');
+            const notificationText = document.querySelector('.notification .notification-text:last-child');
+
+            if (execVersion) {
+                executorDropdownItem.querySelector('.item-version').textContent = `v${execVersion}`;
+                notificationText.textContent = `Glacier ${execVersion} out now!`;
+            } else {
+                notificationText.textContent = `Glacier loading...`;
+                console.warn('Failed to update Executor version for dropdown/notification.');
+            }
+
+            if (externalVersion) {
+                externalDropdownItem.querySelector('.item-version').textContent = `v${externalVersion}`;
+            } else {
+                console.warn('Failed to update External version for dropdown.');
+            }
+            
+            // --- Update Changelogs ---
+            
+            const changelogContainer = document.getElementById('changelogContainer');
+            changelogContainer.innerHTML = ''; // Clear existing content
+            
+            let newChangelogHTML = '';
+            
+            // 1. Executor Changelog (Appears first/top)
+            if (executorChangelogText && execVersion) {
+                newChangelogHTML += createChangelogItem('Executor', execVersion, executorChangelogText);
+            }
+            
+            // 2. External Changelog (Appears second/bottom)
+            if (externalChangelogText && externalVersion) {
+                newChangelogHTML += createChangelogItem('External', externalVersion, externalChangelogText);
+            }
+
+            // Insert the generated HTML
+            changelogContainer.innerHTML = newChangelogHTML || '<div class="changelog-content"><p>No recent changes found.</p></div>';
+        }
+
+        // --- Original Site Logic ---
+
         const dropdownBtn = document.getElementById('downloadBtn');
         const dropdown = document.querySelector('.dropdown');
 
@@ -190,6 +302,8 @@
             }
         }
 
+        // --- Initialization and Interval Setup ---
+        
         window.addEventListener('load', function() {
             const loading = document.querySelector('.loading');
             loading.style.animation = 'fadeOut 1s ease 0.5s forwards';
@@ -199,8 +313,13 @@
             }, 1500);
 
             checkMaintenance();
+
+            // Initial call to load content immediately on site load
+            updateSiteContent(); 
+
+            // Set up the 20-second interval check for versions and changelogs
+            setInterval(updateSiteContent, 20000); // 20000 milliseconds = 20 seconds
         });
     </script>
 </body>
-
 </html>

@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNC Results - Glacier</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+        /* --- CHRISTMAS THEME + UNC DARK THEME --- */
+        :root {
+            --primary-red: #C41E3A;
+            --secondary-green: #165B33;
+            --gold-accent: #FFD700;
+            --snow-white: #F0F8FF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --warning-yellow: #F59E0B;
+            --skipped-blue: #3B82F6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-red), var(--secondary-green));
+            border-radius: 10px;
+        }
+
+        body {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-red) #0a0a0a;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #050505;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Snowflake styling */
+        .snowflakes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.5rem;
+            animation: fall linear infinite;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        .snowflake:nth-child(1) { left: 5%; animation-duration: 12s; animation-delay: 0s; font-size: 1.2rem; }
+        .snowflake:nth-child(2) { left: 15%; animation-duration: 15s; animation-delay: 2s; font-size: 1.8rem; }
+        .snowflake:nth-child(3) { left: 25%; animation-duration: 10s; animation-delay: 4s; font-size: 1.5rem; }
+        .snowflake:nth-child(4) { left: 35%; animation-duration: 14s; animation-delay: 1s; font-size: 1.3rem; }
+        .snowflake:nth-child(5) { left: 45%; animation-duration: 11s; animation-delay: 3s; font-size: 1.6rem; }
+        .snowflake:nth-child(6) { left: 55%; animation-duration: 13s; animation-delay: 5s; font-size: 1.4rem; }
+        .snowflake:nth-child(7) { left: 65%; animation-duration: 16s; animation-delay: 2.5s; font-size: 1.7rem; }
+        .snowflake:nth-child(8) { left: 75%; animation-duration: 12s; animation-delay: 4.5s; font-size: 1.3rem; }
+        .snowflake:nth-child(9) { left: 85%; animation-duration: 14s; animation-delay: 1.5s; font-size: 1.5rem; }
+        .snowflake:nth-child(10) { left: 95%; animation-duration: 11s; animation-delay: 3.5s; font-size: 1.2rem; }
+
+        @keyframes fall {
+            0% {
+                top: -10%;
+                transform: translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                top: 110%;
+                transform: translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(196, 30, 58, 0.03) 0%, transparent 50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(5, 5, 5, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(196, 30, 58, 0.3);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-red);
+            text-shadow: 0 0 10px rgba(196, 30, 58, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: rgba(196, 30, 58, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--primary-red);
+            background: rgba(196, 30, 58, 0.15);
+            text-shadow: 0 0 10px rgba(196, 30, 58, 0.5);
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) {
+            width: 6px;
+            height: 6px;
+            left: 10%;
+            background: rgba(196, 30, 58, 0.6);
+            box-shadow: 0 0 10px rgba(196, 30, 58, 0.4);
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            width: 8px;
+            height: 8px;
+            left: 20%;
+            background: rgba(22, 91, 51, 0.6);
+            box-shadow: 0 0 10px rgba(22, 91, 51, 0.4);
+            animation-delay: -2s;
+        }
+
+        .particle:nth-child(3) {
+            width: 5px;
+            height: 5px;
+            left: 30%;
+            background: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+            animation-delay: -1s;
+        }
+
+        .particle:nth-child(4) {
+            width: 7px;
+            height: 7px;
+            left: 40%;
+            background: rgba(196, 30, 58, 0.6);
+            box-shadow: 0 0 10px rgba(196, 30, 58, 0.4);
+            animation-delay: -3s;
+        }
+
+        .particle:nth-child(5) {
+            width: 6px;
+            height: 6px;
+            left: 50%;
+            background: rgba(22, 91, 51, 0.6);
+            box-shadow: 0 0 10px rgba(22, 91, 51, 0.4);
+            animation-delay: -1.5s;
+        }
+
+        .particle:nth-child(6) {
+            width: 9px;
+            height: 9px;
+            left: 60%;
+            background: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+            animation-delay: -2.5s;
+        }
+
+        .particle:nth-child(7) {
+            width: 5px;
+            height: 5px;
+            left: 70%;
+            background: rgba(196, 30, 58, 0.6);
+            box-shadow: 0 0 8px rgba(196, 30, 58, 0.4);
+            animation-delay: -0.5s;
+        }
+
+        .particle:nth-child(8) {
+            width: 7px;
+            height: 7px;
+            left: 80%;
+            background: rgba(22, 91, 51, 0.6);
+            box-shadow: 0 0 10px rgba(22, 91, 51, 0.4);
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 0.6; }
+            50% {
+                transform: translateY(-20px) translateX(20px) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
+
+        .page {
+            display: none;
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .unc-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .unc-title {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 800;
+            color: var(--primary-red);
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-shadow: 0 0 30px rgba(196, 30, 58, 0.6), 0 0 60px rgba(255, 215, 0, 0.3);
+            letter-spacing: -0.02em;
+            animation: titlePulse 4s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% {
+                text-shadow: 0 0 30px rgba(196, 30, 58, 0.6), 0 0 60px rgba(255, 215, 0, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 40px rgba(196, 30, 58, 0.8), 0 0 80px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        .unc-subtitle {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 3rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 3rem;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(30, 30, 30, 0.6) 100%);
+            border: 1px solid rgba(196, 30, 58, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(196, 30, 58, 0.5);
+            box-shadow: 0 10px 30px rgba(196, 30, 58, 0.2);
+        }
+
+        .stat-card.highlight {
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.2) 0%, rgba(22, 91, 51, 0.15) 100%);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.3), rgba(22, 91, 51, 0.2));
+            color: var(--gold-accent);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            animation: slideUp 1s ease-out;
+        }
+
+        .filter-btn {
+            padding: 12px 28px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid rgba(196, 30, 58, 0.3);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .filter-btn:hover {
+            background: rgba(196, 30, 58, 0.1);
+            color: white;
+            border-color: rgba(196, 30, 58, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.3), rgba(22, 91, 51, 0.2));
+            border-color: var(--gold-accent);
+            color: var(--gold-accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Tests Grid */
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 4rem;
+        }
+
+        .test-card {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(15, 15, 15, 0.8) 100%);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            animation: cardFadeIn 0.5s ease-out backwards;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .test-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .test-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+
+        /* Status-specific styling */
+        .test-card.passed {
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .test-card.passed::before {
+            background: linear-gradient(180deg, var(--success-green), #059669);
+        }
+
+        .test-card.passed:hover {
+            border-color: rgba(16, 185, 129, 0.6);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .test-card.failed {
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .test-card.failed::before {
+            background: linear-gradient(180deg, var(--error-red), #DC2626);
+        }
+
+        .test-card.failed:hover {
+            border-color: rgba(239, 68, 68, 0.6);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
+        }
+
+        .test-card.warning {
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .test-card.warning::before {
+            background: linear-gradient(180deg, var(--warning-yellow), #D97706);
+        }
+
+        .test-card.warning:hover {
+            border-color: rgba(245, 158, 11, 0.6);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
+        }
+
+        .test-card.skipped {
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .test-card.skipped::before {
+            background: linear-gradient(180deg, var(--skipped-blue), #2563EB);
+        }
+
+        .test-card.skipped:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+        }
+
+        .test-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .test-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .test-card.passed .test-icon {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.2));
+            color: var(--success-green);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .test-card.failed .test-icon {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.2));
+            color: var(--error-red);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .test-card.warning .test-icon {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.2));
+            color: var(--warning-yellow);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .test-card.skipped .test-icon {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.2));
+            color: var(--skipped-blue);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .test-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            word-break: break-all;
+        }
+
+        .test-category {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(196, 30, 58, 0.2);
+            border: 1px solid rgba(196, 30, 58, 0.3);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--gold-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .test-message {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(30, 30, 30, 0.7) 100%);
+            border: 1px solid rgba(196, 30, 58, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            animation: slideUp 1.2s ease-out;
+        }
+
+        .summary-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(180deg, rgba(196, 30, 58, 0.15) 0%, transparent 100%);
+            border-radius: 20px 20px 50% 50%;
+        }
+
+        .summary-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-red);
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(196, 30, 58, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .summary-content {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .summary-content strong {
+            color: var(--gold-accent);
+            font-weight: 600;
+        }
+
+        /* Loading Screen */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeOut 1s ease 1.5s forwards;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(196, 30, 58, 0.2);
+            border-top: 3px solid var(--gold-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 12px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .unc-container {
+                padding: 2rem 1rem;
+            }
+
+            .stats-banner {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                gap: 10px;
+            }
+
+            .filter-btn {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+
+            .tests-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-section {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span>Glacier</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="download.html" class="nav-link">Download</a>
+            <a href="offsets.html" class="nav-link">Offsets</a>
+            <a href="unc.html" class="nav-link active">UNC</a>
+            <a href="team.html" class="nav-link">Team</a>
+        </div>
+    </nav>
+
+    <div class="dark-overlay"></div>
+    
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="snowflakes" aria-hidden="true">
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❄</div>
+    </div>
+
+    <div class="page active">
+        <div class="container unc-container">
+            <h1 class="unc-title">UNC Environment Check</h1>
+            <p class="unc-subtitle">Unified Naming Convention Test Results</p>
+
+            <div class="stats-banner">
+                <div class="stat-card">
+                    <div class="stat-icon">✓</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="passedCount">49</div>
+                        <div class="stat-label">Passed</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✕</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="failedCount">33</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="aliasCount">5</div>
+                        <div class="stat-label">Missing Aliases</div>
+                    </div>
+                </div>
+                <div class="stat-card highlight">
+                    <div class="stat-icon">%</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="successRate">60%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">All Tests</button>
+                <button class="filter-btn" data-filter="passed">Passed</button>
+                <button class="filter-btn" data-filter="failed">Failed</button>
+                <button class="filter-btn" data-filter="warning">Warnings</button>
+                <button class="filter-btn" data-filter="skipped">Skipped</button>
+            </div>
+
+            <div class="tests-grid" id="testsGrid">
+                <!-- Tests will be inserted here by JavaScript -->
+            </div>
+
+            <div class="summary-section">
+                <h2 class="summary-title">Test Summary</h2>
+                <div class="summary-content">
+                    <p>Glacier has successfully passed <strong>60%</strong> of all UNC environment checks.</p>
+                    <p>Out of <strong>82 total tests</strong>, <strong>49</strong> passed, <strong>33</strong> failed, and <strong>5</strong> are missing aliases.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const testData = [
+            { name: 'cache.invalidate', status: 'failed', category: 'Cache', message: null },
+            { name: 'cache.iscached', status: 'failed', category: 'Cache', message: null },
+            { name: 'cache.replace', status: 'failed', category: 'Cache', message: null },
+            { name: 'cloneref', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'compareinstances', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'checkcaller', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'clonefunction', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'getcallingscript', status: 'skipped', category: 'Core', message: null },
+            { name: 'getscriptclosure', status: 'failed', category: 'Core', message: 'Constants is not a valid member of Folder' },
+            { name: 'getscriptfunction', status: 'warning', category: 'Core', message: null },
+            { name: 'hookfunction', status: 'failed', category: 'Core', message: 'Function should return false' },
+            { name: 'iscclosure', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'islclosure', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'isexecutorclosure', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'newcclosure', status: 'passed', category: 'Core', message: 'nil' },
+            { name: 'rconsoleclear', status: 'skipped', category: 'Console', message: null },
+            { name: 'rconsolecreate', status: 'skipped', category: 'Console', message: null },
+            { name: 'rconsoledestroy', status: 'skipped', category: 'Console', message: null },
+            { name: 'rconsoleinput', status: 'skipped', category: 'Console', message: null },
+            { name: 'rconsoleprint', status: 'skipped', category: 'Console', message: null },
+            { name: 'rconsolesettitle', status: 'skipped', category: 'Console', message: null },
+            { name: 'rconsolename', status: 'warning', category: 'Console', message: 'consolesettitle' },
+            { name: 'crypt.base64encode', status: 'passed', category: 'Cryptography', message: 'nil' },
+            { name: 'crypt.base64decode', status: 'passed', category: 'Cryptography', message: 'nil' },
+            { name: 'crypt.encrypt', status: 'passed', category: 'Cryptography', message: 'nil' },
+            { name: 'crypt.decrypt', status: 'passed', category: 'Cryptography', message: 'nil' },
+            { name: 'crypt.generatebytes', status: 'passed', category: 'Cryptography', message: 'nil' },
+            { name: 'crypt.generatekey', status: 'passed', category: 'Cryptography', message: 'nil' },
+            { name: 'crypt.hash', status: 'passed', category: 'Cryptography', message: 'nil' },
+            { name: 'debug.getconstant', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.getconstants', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.getinfo', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.getproto', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.getprotos', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.getstack', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.getupvalue', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.getupvalues', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.setconstant', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.setstack', status: 'failed', category: 'Debug', message: null },
+            { name: 'debug.setupvalue', status: 'failed', category: 'Debug', message: null },
+            { name: 'dofile', status: 'skipped', category: 'Filesystem', message: null },
+            { name: 'isrbxactive', status: 'passed', category: 'Input', message: 'nil' },
+            { name: 'mouse1click', status: 'skipped', category: 'Input', message: null },
+            { name: 'mouse1press', status: 'skipped', category: 'Input', message: null },
+            { name: 'mouse1release', status: 'skipped', category: 'Input', message: null },
+            { name: 'mouse2click', status: 'skipped', category: 'Input', message: null },
+            { name: 'mouse2press', status: 'skipped', category: 'Input', message: null },
+            { name: 'mouse2release', status: 'skipped', category: 'Input', message: null },
+            { name: 'mousemoveabs', status: 'skipped', category: 'Input', message: null },
+            { name: 'mousemoverel', status: 'skipped', category: 'Input', message: null },
+            { name: 'mousescroll', status: 'skipped', category: 'Input', message: null },
+            { name: 'fireclickdetector', status: 'failed', category: 'Instance', message: 'attempt to index nil with Heartbeat' },
+            { name: 'getcallbackvalue', status: 'failed', category: 'Instance', message: null },
+            { name: 'getconnections', status: 'failed', category: 'Instance', message: null },
+            { name: 'gethiddenproperty', status: 'failed', category: 'Instance', message: 'Did not return the correct value' },
+            { name: 'sethiddenproperty', status: 'failed', category: 'Instance', message: null },
+            { name: 'gethui', status: 'passed', category: 'Instance', message: 'nil' },
+            { name: 'getinstances', status: 'passed', category: 'Instance', message: 'nil' },
+            { name: 'getnilinstances', status: 'passed', category: 'Instance', message: 'nil' },
+            { name: 'isscriptable', status: 'failed', category: 'Instance', message: null },
+            { name: 'setscriptable', status: 'failed', category: 'Instance', message: null },
+            { name: 'setrbxclipboard', status: 'skipped', category: 'Misc', message: null },
+            { name: 'getrawmetatable', status: 'failed', category: 'Metatable', message: null },
+            { name: 'hookmetamethod', status: 'failed', category: 'Metatable', message: null },
+            { name: 'getnamecallmethod', status: 'failed', category: 'Metatable', message: 'attempt to call a nil value' },
+            { name: 'isreadonly', status: 'failed', category: 'Metatable', message: null },
+            { name: 'setrawmetatable', status: 'failed', category: 'Metatable', message: null },
+            { name: 'setreadonly', status: 'failed', category: 'Metatable', message: 'attempt to call a nil value' },
+            { name: 'identifyexecutor', status: 'passed', category: 'Misc', message: 'Returns version as a string' },
+            { name: 'lz4compress', status: 'passed', category: 'Misc', message: 'nil' },
+            { name: 'lz4decompress', status: 'passed', category: 'Misc', message: 'nil' },
+            { name: 'messagebox', status: 'skipped', category: 'Misc', message: null },
+            { name: 'queue_on_teleport', status: 'skipped', category: 'Misc', message: null },
+            { name: 'queueonteleport', status: 'warning', category: 'Misc', message: null },
+            { name: 'setclipboard', status: 'skipped', category: 'Misc', message: null },
+            { name: 'getgc', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getgenv', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getloadedmodules', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getrenv', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getrunningscripts', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getscripthash', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getscripts', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getsenv', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'getthreadidentity', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'setthreadidentity', status: 'failed', category: 'Script', message: null },
+            { name: 'setidentity', status: 'warning', category: 'Script', message: 'setthreadcontext' },
+            { name: 'Drawing', status: 'skipped', category: 'Drawing', message: null },
+            { name: 'Drawing.new', status: 'passed', category: 'Drawing', message: 'nil' },
+            { name: 'Drawing.Fonts', status: 'passed', category: 'Drawing', message: 'nil' },
+            { name: 'isrenderobj', status: 'passed', category: 'Drawing', message: 'nil' },
+            { name: 'getrenderproperty', status: 'passed', category: 'Drawing', message: 'nil' },
+            { name: 'setrenderproperty', status: 'passed', category: 'Drawing', message: 'nil' },
+            { name: 'cleardrawcache', status: 'passed', category: 'Drawing', message: 'nil' },
+            { name: 'WebSocket', status: 'skipped', category: 'WebSocket', message: null },
+            { name: 'WebSocket.connect', status: 'failed', category: 'WebSocket', message: null },
+            { name: 'getcustomasset', status: 'failed', category: 'Filesystem', message: 'attempt to index nil with writefile' },
+            { name: 'getscriptbytecode', status: 'passed', category: 'Script', message: 'nil' },
+            { name: 'loadstring', status: 'failed', category: 'Script', message: 'missing argument #1' },
+            { name: 'readfile', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'makefolder', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'isfolder', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'writefile', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'delfolder', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'delfile', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'isfile', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'appendfile', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'listfiles', status: 'passed', category: 'Filesystem', message: 'nil' },
+            { name: 'setfpscap', status: 'passed', category: 'Misc', message: '78fps @60 • 65fps @0' },
+            { name: 'request', status: 'passed', category: 'Network', message: 'User-Agent: Glacier/1.3.0' },
+            { name: 'http.request', status: 'warning', category: 'Network', message: 'http_request' }
+        ];
+
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'passed': return '✓';
+                case 'failed': return '✕';
+                case 'warning': return '⚠';
+                case 'skipped': return '▸';
+                default: return '?';
+            }
+        }
+
+        function renderTests(filter = 'all') {
+            const grid = document.getElementById('testsGrid');
+            grid.innerHTML = '';
+
+            const filtered = filter === 'all' 
+                ? testData 
+                : testData.filter(test => test.status === filter);
+
+            filtered.forEach((test, index) => {
+                const card = document.createElement('div');
+                card.className = `test-card ${test.status}`;
+                card.style.animationDelay = `${index * 0.02}s`;
+                
+                card.innerHTML = `
+                    <div class="test-header">
+                        <div class="test-icon">${getStatusIcon(test.status)}</div>
+                        <div class="test-name">${test.name}</div>
+                    </div>
+                    <div class="test-category">${test.category}</div>
+                    ${test.message ? `<div class="test-message">${test.message}</div>` : ''}
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderTests(btn.dataset.filter);
+            });
+        });
+
+        window.addEventListener('load', function() {
+            const loading = document.querySelector('.loading');
+            loading.style.animation = 'fadeOut 1s ease 0.5s forwards';
+            
+            setTimeout(function() {
+                loading.style.display = 'none';
+            }, 1500);
+
+            renderTests();
+        });
+    </script>
+</body>
+</html>

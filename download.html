@@ -62,31 +62,14 @@
                             <span class="arrow">▼</span>
                         </button>
                         <div class="dropdown-content" id="dropdownContent">
-                            <a href="https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/GlacierExecutor.rar" class="dropdown-item" data-version="glcr-1.2.11b">
-                                <div class="item-header">
-                                    <div class="item-left">
-                                        <span class="item-name">Glacier Executor</span>
-                                        <span class="item-version">v3.0.1b</span> </div>
-                                    <span class="badge updated-badge">Updated</span>
-                                </div>
-                                <div class="item-stats">
-                                    <div class="stat-item">
-                                        <span class="stat-label">UNC</span>
-                                        <span class="stat-value">59</span>
-                                    </div>
-                                    <div class="stat-divider"></div>
-                                    <div class="stat-item">
-                                        <span class="stat-label">sUNC</span>
-                                        <span class="stat-value">27</span>
-                                    </div>
-                                </div>
-                            </a>
+                            
                             <a href="https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/glacier_studios.exe" class="dropdown-item" data-version="glcr-1.0.0b">
                                 <div class="item-header">
                                     <div class="item-left">
                                         <span class="item-name">Glacier External</span>
-                                        <span class="item-version">v1.2b</span> </div>
-                                    <span class="badge updated-badge">Updated</span>
+                                        <span class="item-version">v1.2b</span>
+                                    </div>
+                                    <span class="badge updated-badge" id="externalStatusBadge">Updated</span>
                                 </div>
                                 <div class="item-stats">
                                     <div class="stat-item">
@@ -100,13 +83,35 @@
                                     </div>
                                 </div>
                             </a>
-                            <a href="#" class="dropdown-item disabled" data-version="glcr-1.0.0b">
+
+                            <a href="https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/GlacierExecutor.rar" class="dropdown-item" data-version="glcr-1.2.11b">
                                 <div class="item-header">
                                     <div class="item-left">
-                                        <span class="item-name">Glacier ServerSide</span>
-                                        <span class="item-version">v1.0.0b</span>
+                                        <span class="item-name">Glacier Executor</span>
+                                        <span class="item-version">v3.0.1b</span>
                                     </div>
-                                    <span class="badge coming-soon">Coming Soon</span>
+                                    <span class="badge updated-badge" id="executorStatusBadge">Updated</span>
+                                </div>
+                                <div class="item-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">UNC</span>
+                                        <span class="stat-value">59</span>
+                                    </div>
+                                    <div class="stat-divider"></div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">sUNC</span>
+                                        <span class="stat-value">27</span>
+                                    </div>
+                                </div>
+                            </a>
+                            
+                            <a href="https://discord.gg/RJsKEZZ7Js" class="dropdown-item" data-version="glcr-1.0.0b">
+                                <div class="item-header">
+                                    <div class="item-left">
+                                        <span class="item-name">Glacier ExecAPI</span>
+                                        <span class="item-version">v1.0.0</span>
+                                    </div>
+                                    <span class="badge coming-soon" id="execAPIBadge">Coming Soon</span>
                                 </div>
                                 <div class="item-stats">
                                     <div class="stat-item">
@@ -137,23 +142,25 @@
     <div class="notification">
         <div class="notification-title">All Systems Operational</div>
         <div class="notification-text">Everything running smoothly!</div>
-        <div class="notification-text">Glacier loading...</div> </div>
+        <div class="notification-text">Glacier loading...</div>
+    </div>
 
     <script>
-        // --- CORRECTED URL MAPPING ---
+        // --- URL CONFIGURATION ---
         const EXECUTOR_VERSION_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/versionexec';
         const EXTERNAL_VERSION_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/version';
-        
-        // Corrected Changelog URLs based on your latest input
         const EXECUTOR_CHANGELOG_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/changelogsexec.txt';
-        const EXTERNAL_CHANGELOG_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/changelogs'; 
+        const EXTERNAL_CHANGELOG_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/changelogs';
+        
+        // Status URLs
+        const EXECUTOR_STATUS_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/executorstatus';
+        const EXTERNAL_STATUS_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/externalstatus';
+        const EXECAPI_STATUS_URL = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/execapistatus';
 
-        // --- Core Functions for Dynamic Content ---
+        // --- HELPER FUNCTIONS ---
 
         /**
-         * Fetches plain text content from a URL, appending a timestamp to prevent caching.
-         * @param {string} url The URL to fetch.
-         * @returns {Promise<string|null>} The fetched text or null on failure.
+         * Fetches plain text content from a URL with cache busting
          */
         async function fetchText(url) {
             try {
@@ -170,26 +177,75 @@
         }
 
         /**
-         * Converts raw changelog content into the required HTML structure with a custom title.
-         * Keeps all lines of the fetched content in the body.
-         * @param {string} productName 'Executor' or 'External'.
-         * @param {string} version The version string (e.g., '3.0.1b').
-         * @param {string} rawText The raw changelog text.
-         * @returns {string} The HTML for a single changelog item.
+         * Maps emoji status to text and badge class
+         */
+        function getStatusInfo(emoji) {
+            const trimmed = emoji.trim();
+            switch(trimmed) {
+                case '🟢':
+                    return { text: 'Updated', class: 'updated-badge' };
+                case '🟡':
+                    return { text: 'Updating', class: 'updating-badge' };
+                case '🔴':
+                    return { text: 'Not Working', class: 'offline-badge' };
+                case '🔵': // Assuming a new emoji for 'Coming Soon' or 'Planned' status
+                    return { text: 'Coming Soon', class: 'coming-soon' };
+                default:
+                    return { text: 'Unknown', class: 'updated-badge' };
+            }
+        }
+
+        /**
+         * Updates status badges for Executor, External, and ExecAPI
+         * NOTE: The query selectors are now using :nth-child(index) to find the correct item based on the new order.
+         */
+        async function updateStatuses() {
+            console.log('Checking status updates...');
+            
+            // Fetch all three statuses
+            const [executorStatus, externalStatus, execAPIStatus] = await Promise.all([
+                fetchText(EXECUTOR_STATUS_URL),
+                fetchText(EXTERNAL_STATUS_URL),
+                fetchText(EXECAPI_STATUS_URL) 
+            ]);
+
+            // Update External status (Now First: :nth-child(1))
+            const externalBadge = document.querySelector('.dropdown-item:nth-child(1) #externalStatusBadge');
+            if (externalStatus && externalBadge) {
+                const statusInfo = getStatusInfo(externalStatus);
+                externalBadge.textContent = statusInfo.text;
+                externalBadge.className = 'badge ' + statusInfo.class;
+            }
+
+            // Update Executor status (Now Second: :nth-child(2))
+            const executorBadge = document.querySelector('.dropdown-item:nth-child(2) #executorStatusBadge');
+            if (executorStatus && executorBadge) {
+                const statusInfo = getStatusInfo(executorStatus);
+                executorBadge.textContent = statusInfo.text;
+                executorBadge.className = 'badge ' + statusInfo.class;
+            }
+
+            // Update ExecAPI status (Now Third: :nth-child(3))
+            const execAPIBadge = document.querySelector('.dropdown-item:nth-child(3) #execAPIBadge');
+            if (execAPIStatus && execAPIBadge) {
+                const statusInfo = getStatusInfo(execAPIStatus);
+                execAPIBadge.textContent = statusInfo.text;
+                execAPIBadge.className = 'badge ' + statusInfo.class;
+            }
+        }
+
+        /**
+         * Creates a changelog item with custom title
          */
         function createChangelogItem(productName, version, rawText) {
             const lines = rawText.trim().split('\n').filter(line => line.trim() !== '');
             if (lines.length === 0) return '';
 
-            // Keep ALL lines of content.
             const contentLines = lines;
-            
-            // Custom title format: "Executor - Version 3.0.1b"
             const versionTitle = `${productName} - Version ${version}`;
 
             let contentHtml = '';
             contentLines.forEach(line => {
-                // Wrap each line in <p> tags
                 contentHtml += `<p>${line.trim()}</p>`;
             });
 
@@ -204,12 +260,12 @@
         }
 
         /**
-         * Main function to fetch all dynamic content and update the site.
+         * Updates versions and changelogs
+         * NOTE: The query selectors are now using :nth-child(index) to find the correct item based on the new order.
          */
         async function updateSiteContent() {
             console.log('Fetching latest versions and changelogs...');
             
-            // Fetch all required data in parallel
             const [
                 executorVersionText, 
                 externalVersionText, 
@@ -222,14 +278,14 @@
                 fetchText(EXTERNAL_CHANGELOG_URL)
             ]);
 
-            // Assuming version files contain only the version number as the first line
             const execVersion = executorVersionText ? executorVersionText.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0)[0] : null;
             const externalVersion = externalVersionText ? externalVersionText.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0)[0] : null;
             
-            // --- Update Dropdown Versions and Notification ---
-            
-            const executorDropdownItem = document.querySelector('.dropdown-item:nth-child(1)');
-            const externalDropdownItem = document.querySelector('.dropdown-item:nth-child(2)');
+            // Update Dropdown Versions (Adjusted indices)
+            const externalDropdownItem = document.querySelector('.dropdown-item:nth-child(1)'); // External is now 1st
+            const executorDropdownItem = document.querySelector('.dropdown-item:nth-child(2)'); // Executor is now 2nd
+            // NOTE: ExecAPI version text is hardcoded to "Discord" in HTML
+
             const notificationText = document.querySelector('.notification .notification-text:last-child');
 
             if (execVersion) {
@@ -237,38 +293,30 @@
                 notificationText.textContent = `Glacier ${execVersion} out now!`;
             } else {
                 notificationText.textContent = `Glacier loading...`;
-                console.warn('Failed to update Executor version for dropdown/notification.');
             }
 
             if (externalVersion) {
                 externalDropdownItem.querySelector('.item-version').textContent = `${externalVersion}`;
-            } else {
-                console.warn('Failed to update External version for dropdown.');
             }
             
-            // --- Update Changelogs ---
-            
+            // Update Changelogs
             const changelogContainer = document.getElementById('changelogContainer');
-            changelogContainer.innerHTML = ''; // Clear existing content
+            changelogContainer.innerHTML = '';
             
             let newChangelogHTML = '';
             
-            // 1. Executor Changelog (Appears first/top)
             if (executorChangelogText && execVersion) {
                 newChangelogHTML += createChangelogItem('Executor', execVersion, executorChangelogText);
             }
             
-            // 2. External Changelog (Appears second/bottom)
             if (externalChangelogText && externalVersion) {
                 newChangelogHTML += createChangelogItem('External', externalVersion, externalChangelogText);
             }
 
-            // Insert the generated HTML
             changelogContainer.innerHTML = newChangelogHTML || '<div class="changelog-content"><p>No recent changes found.</p></div>';
         }
 
-        // --- Original Site Logic ---
-
+        // --- DROPDOWN LOGIC ---
         const dropdownBtn = document.getElementById('downloadBtn');
         const dropdown = document.querySelector('.dropdown');
 
@@ -282,12 +330,14 @@
             }
         });
 
+        // The listener below ensures only disabled items are blocked.
         document.querySelectorAll('.dropdown-item.disabled').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
             });
         });
 
+        // --- MAINTENANCE CHECK ---
         async function checkMaintenance() {
             try {
                 const response = await fetch('maintenance.txt?t=' + Date.now());
@@ -302,8 +352,7 @@
             }
         }
 
-        // --- Initialization and Interval Setup ---
-        
+        // --- INITIALIZATION ---
         window.addEventListener('load', function() {
             const loading = document.querySelector('.loading');
             loading.style.animation = 'fadeOut 1s ease 0.5s forwards';
@@ -314,13 +363,52 @@
 
             checkMaintenance();
 
-            // Initial call to load content immediately on site load
-            updateSiteContent(); 
+            // Initial content load
+            updateSiteContent();
+            updateStatuses();
 
-            // Set up the 20-second interval check for versions and changelogs
-            setInterval(updateSiteContent, 20000); // 20000 milliseconds = 20 seconds
+            // Update versions/changelogs every 20 seconds
+            setInterval(updateSiteContent, 20000);
+            
+            // Update statuses every 23 seconds
+            setInterval(updateStatuses, 23000);
         });
     </script>
-</body>
 
+    <style>
+        /* Status badge styles */
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .updated-badge {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .updating-badge {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        .offline-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .coming-soon {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+    </style>
+</body>
 </html>

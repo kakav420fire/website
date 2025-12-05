@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glacier - Changelogs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #000;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #fff;
+            position: relative;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 12px;
+            height: 12px;
+            background: #00ffff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: all 0.05s ease;
+            box-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 100px rgba(0, 255, 255, 0.5);
+            mix-blend-mode: screen;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-trail {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            mix-blend-mode: screen;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Animated Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(0, 150, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 150, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px, 50px 50px, 200px 200px, 200px 200px;
+            background-position: 0 0, 0 0, 0 0, 0 0;
+            animation: gridMove 20s linear infinite, gridPulse 4s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+            100% { background-position: 50px 50px, 50px 50px, 200px 200px, 200px 200px; }
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ffff;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Glowing Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 0;
+            animation: orbFloat 15s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        .orb1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #00ffff, transparent);
+            top: -250px;
+            left: -250px;
+        }
+
+        .orb2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #0088ff, transparent);
+            bottom: -300px;
+            right: -300px;
+            animation-delay: 5s;
+        }
+
+        .orb3 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, #00ccff, transparent);
+            top: 50%;
+            right: -225px;
+            animation-delay: 10s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(120px, -120px) scale(1.3); }
+            66% { transform: translate(-80px, 100px) scale(0.9); }
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 20, 30, 0.7);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 14px;
+            padding: 10px 20px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: fadeInDown 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .navbar a {
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .navbar a:hover {
+            color: #ffffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .navbar a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #00ffff;
+            transform: scaleX(0);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: right;
+        }
+
+        .navbar a:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px 100px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .logo-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo {
+            font-size: 80px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffff 0%, #0099ff 50%, #00ccff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 8px;
+            position: relative;
+            filter: drop-shadow(0 0 40px rgba(0, 255, 255, 0.8));
+        }
+
+        .tagline {
+            font-size: 18px;
+            color: #00ffff;
+            letter-spacing: 4px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Product Navigation */
+        .product-nav {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 50px;
+            background: rgba(0, 20, 30, 0.6);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 15px 25px;
+            backdrop-filter: blur(20px);
+            animation: fadeInScale 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+        }
+
+        .product-nav-btn {
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px 30px;
+            color: #66ccff;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .product-nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .product-nav-btn:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .product-nav-btn.active {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: #00ffff;
+            color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3),
+                        inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        /* Changelogs Content */
+        .changelogs-content {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .product-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .product-section.active {
+            display: block;
+        }
+
+        .changelog-card {
+            background: rgba(0, 20, 30, 0.6);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .changelog-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .changelog-card:hover::before {
+            left: 100%;
+        }
+
+        .changelog-card:hover {
+            border-color: rgba(0, 255, 255, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.2);
+        }
+
+        .changelog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .changelog-version {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00ffff, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .changelog-date {
+            font-size: 14px;
+            color: #66ccff;
+            font-weight: 600;
+            background: rgba(0, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .changelog-content {
+            color: #99ddff;
+            line-height: 1.8;
+        }
+
+        .changelog-content h3 {
+            color: #00ffff;
+            font-size: 20px;
+            margin: 20px 0 15px 0;
+            font-weight: 700;
+        }
+
+        .changelog-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .changelog-content li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .changelog-content li::before {
+            content: '笆ｸ';
+            position: absolute;
+            left: 0;
+            color: #00ffff;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .changelog-content li:hover {
+            padding-left: 35px;
+            color: #00ffff;
+        }
+
+        .changelog-content li:hover::before {
+            left: 5px;
+        }
+
+        /* Placeholder Message */
+        .placeholder-message {
+            text-align: center;
+            padding: 80px 40px;
+            background: rgba(0, 20, 30, 0.6);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        /* UPDATED: Custom SVG icon styling for placeholder */
+        .placeholder-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 3px solid rgba(0, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            margin: 0 auto 25px auto;
+            opacity: 1; /* Ensure it's not half-transparent */
+        }
+        
+        .placeholder-icon svg {
+            width: 50px;
+            height: 50px;
+            fill: #00ffff; /* Ensure fill color is set */
+            filter: drop-shadow(0 0 10px currentColor);
+            transition: all 0.3s ease;
+        }
+        
+        .placeholder-icon:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        /* END UPDATED CSS */
+
+        .placeholder-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00ffff, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .placeholder-text {
+            font-size: 18px;
+            color: #66ccff;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                right: 50%;
+                transform: translateX(50%);
+                top: 10px;
+                padding: 8px 15px;
+            }
+            .navbar a {
+                font-size: 14px;
+                padding: 6px 8px;
+            }
+            .logo { font-size: 50px; }
+            .tagline { font-size: 14px; }
+            .product-nav {
+                flex-direction: column;
+                gap: 12px;
+                width: 90%;
+            }
+            .product-nav-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            .changelog-card {
+                padding: 25px;
+            }
+            .changelog-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            .changelog-version {
+                font-size: 24px;
+            }
+            /* Media query for new icon size on small screens */
+            .placeholder-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 12px;
+            }
+            .placeholder-icon svg {
+                width: 40px;
+                height: 40px;
+            }
+            /* END UPDATED MEDIA QUERY */
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-trail"></div>
+
+    <div class="grid-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="offsets.html">Offsets</a>
+        <a href="changelogs.html">Changelogs</a>
+        <a href="news.html">News</a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">GLACIER</div>
+            </div>
+            <div class="tagline">Changelogs</div>
+        </div>
+
+        <div class="product-nav">
+            <button class="product-nav-btn active" data-product="external">External</button>
+            <button class="product-nav-btn" data-product="executor">Executor</button>
+            <button class="product-nav-btn" data-product="execapi">ExecAPI</button>
+        </div>
+
+        <div class="changelogs-content">
+            <div class="product-section active" id="external-section">
+                <div class="placeholder-message">
+                    <div class="placeholder-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                    </div>
+                    <div class="placeholder-title">Changelogs Coming Soon</div>
+                    <div class="placeholder-text">
+                        Glacier External changelogs will be available here soon.<br>
+                        Stay tuned for updates on features, fixes, and improvements!
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-section" id="executor-section">
+                <div class="placeholder-message">
+                    <div class="placeholder-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                    </div>
+                    <div class="placeholder-title">Changelogs Coming Soon</div>
+                    <div class="placeholder-text">
+                        Glacier Executor changelogs will be available here soon.<br>
+                        Stay tuned for updates on features, fixes, and improvements!
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-section" id="execapi-section">
+                <div class="placeholder-message">
+                    <div class="placeholder-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                    </div>
+                    <div class="placeholder-title">Changelogs Coming Soon</div>
+                    <div class="placeholder-text">
+                        Glacier ExecAPI changelogs will be available here soon.<br>
+                        Stay tuned for updates on features, fixes, and improvements!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particle system
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 8 + 12) + 's';
+            particle.style.animationDelay = Math.random() * 5 + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorTrail = document.querySelector('.cursor-trail');
+        let mouseX = 0, mouseY = 0;
+        let trailX = 0, trailY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+            
+            trailX += (mouseX - trailX) * 0.15;
+            trailY += (mouseY - trailY) * 0.15;
+            
+            cursorTrail.style.left = trailX + 'px';
+            cursorTrail.style.top = trailY + 'px';
+            
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Product navigation
+        const productBtns = document.querySelectorAll('.product-nav-btn');
+        const productSections = document.querySelectorAll('.product-section');
+
+        productBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const product = btn.dataset.product;
+                
+                // Update active button
+                productBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update active section
+                productSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${product}-section`).classList.add('active');
+            });
+        });
+
+        // Cursor effects for interactive elements
+        const interactives = document.querySelectorAll('.navbar a, .product-nav-btn, .changelog-card, .placeholder-icon');
+        interactives.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(2)';
+                cursorTrail.style.borderWidth = '3px';
+                cursorTrail.style.borderColor = 'rgba(0, 255, 255, 0.6)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+                cursorTrail.style.borderWidth = '2px';
+                cursorTrail.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+            });
+        });
+    </script>
+</body>
+</html>

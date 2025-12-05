@@ -1,5 +1,0 @@
-
-// Roblox Version: version-6e8186c3f6ce4303
-
-namespace offsets {
-}

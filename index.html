@@ -711,18 +711,17 @@
                     <span class="dropdown-title">Product Status</span>
                     <div class="dropdown-arrow" id="dropdownArrow"></div>
                 </div>
-                <div class="dropdown-menu" id="dropdownMenu">
-                    <div class="dropdown-item">
-                        <div class="item-header">
-                            <div class="item-name">Glacier External</div>
-                            <span class="status-badge" id="external-status-badge">Loading...</span>
-                        </div>
-                        <div class="item-details">
-                            <span class="item-stat" id="external-version-stat">v-L O A D b</span>
-                            <span class="item-stat" id="external-compat-stat">L O A D % Compatibility</span>
-                            <span class="item-stat">Free</span>
-                        </div>
-                    </div>
+<div class="dropdown-item" id="external-item" style="cursor: pointer;">
+    <div class="item-header">
+        <div class="item-name">Glacier External</div>
+        <span class="status-badge" id="external-status-badge">Loading...</span>
+    </div>
+    <div class="item-details">
+        <span class="item-stat" id="external-version-stat">v-L O A D b</span>
+        <span class="item-stat" id="external-compat-stat">L O A D % Compatibility</span>
+        <span class="item-stat">Free</span>
+    </div>
+</div>
                     
                     <div class="dropdown-item">
                         <div class="item-header">
@@ -829,6 +828,30 @@
          * @param {string} elementId The ID of the status badge element.
          * @param {string} emoji The status emoji (🟢, 🟡, 🔴, 🟣).
          */
+
+        document.getElementById('external-item').addEventListener('click', () => {
+    const downloadUrl = 'https://raw.githubusercontent.com/g4biGTJS/glacierstuff/refs/heads/main/alpha.zip';
+    
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'alpha.zip'; // Suggested filename
+    link.style.display = 'none';
+    
+    // Append to body, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Optional: Visual feedback
+    const externalItem = document.getElementById('external-item');
+    const originalBg = externalItem.style.background;
+    externalItem.style.background = 'rgba(0, 255, 255, 0.2)';
+    setTimeout(() => {
+        externalItem.style.background = originalBg;
+    }, 300);
+});
+        
         function updateStatusBadge(elementId, emoji) {
             const el = document.getElementById(elementId);
             const status = STATUS_EMOJIS[emoji] || { text: 'Unknown', class: 'status-error' };
@@ -998,4 +1021,5 @@
         window.onload = loadProductData;
     </script>
 </body>
+
 </html>
